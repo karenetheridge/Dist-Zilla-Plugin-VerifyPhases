@@ -90,10 +90,14 @@ It runs at the C<-FileMunger> and C<-AfterBuild> phases to record the state
 of files after they have been munged, and again at the end of the build
 process.  Any files that have had their names or content changed are flagged.
 
+=for stopwords FromCode
+
 Currently, L<FromCode|Dist::Zilla::File::FromCode> files are not checked for
 content, as interesting side effects can occur if their content subs are run
 before all content is available (for example, other lazy builders can run too
 early, resulting in incomplete or missing data).
+
+=for Pod::Coverage gather_files munge_files after_build
 
 =head1 SUPPORT
 
