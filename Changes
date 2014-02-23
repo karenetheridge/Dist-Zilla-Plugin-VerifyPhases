@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+          - avoid warning about late modifications to Makefile.PL and
+            Build.PL, as this is normal and expected
 
 0.001     2014-02-23 05:11:23Z
           - Initial release.

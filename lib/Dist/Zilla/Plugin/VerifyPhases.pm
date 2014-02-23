@@ -11,9 +11,20 @@ with
     'Dist::Zilla::Role::AfterBuild';
 use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
+use List::MoreUtils 'none';
 use namespace::autoclean;
 
 my %all_files;
+
+#sub mvp_multivalue_args { qw(skip) }
+has skip => (
+    isa => 'ArrayRef[Str]',
+    traits => [ 'Array' ],
+    handles => { skip => 'elements' },
+    init_arg => undef,   # do not allow in configs just yet
+    lazy => 1,
+    default => sub { [ qw(Makefile.PL Build.PL) ] },
+);
 
 sub gather_files
 {
@@ -58,6 +69,7 @@ sub after_build
             # changed_by attributes
                 . '\' (' . $file->added_by . ')')
             if not $file->isa('Dist::Zilla::File::FromCode')
+                and none { $file->name eq $_ } $self->skip
                 and $all_files{$file->name} ne md5_hex($file->encoded_content);
 
         delete $all_files{$file->name};
