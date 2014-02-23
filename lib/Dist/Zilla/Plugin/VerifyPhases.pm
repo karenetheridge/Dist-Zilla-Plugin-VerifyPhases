@@ -46,13 +46,17 @@ sub after_build
     {
         if (not exists $all_files{$file->name})
         {
-            $self->log('file has been added after munging phase: \'' . $file->name . '\'');
+            $self->log('file has been added after munging phase: \'' . $file->name
+                . '\' (' . $file->added_by . ')');
             next;
         }
 
         # we give FromCode files a bye, since there is a good reason why their
         # content at file munging time is incomplete
-        $self->log('content has changed after munging phase: \'' . $file->name . '\'')
+        $self->log('content has changed after munging phase: \'' . $file->name
+            # this looks suspicious; we ought to have separate added_by,
+            # changed_by attributes
+                . '\' (' . $file->added_by . ')')
             if not $file->isa('Dist::Zilla::File::FromCode')
                 and $all_files{$file->name} ne md5_hex($file->encoded_content);
 

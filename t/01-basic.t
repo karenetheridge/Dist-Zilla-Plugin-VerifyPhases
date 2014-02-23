@@ -7,6 +7,7 @@ use Test::Fatal;
 use Test::Deep;
 use Test::DZil;
 
+my $added_line;
 {
     package Dist::Zilla::Plugin::Naughty;
     use Moose;
@@ -24,7 +25,7 @@ use Test::DZil;
     {
         my $self = shift;
         require Dist::Zilla::File::InMemory;
-        $self->add_file( Dist::Zilla::File::InMemory->new(
+        $added_line = __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
             name => 'rogue_file',
             content => 'naughty naughty!',
         ));
@@ -51,7 +52,7 @@ use Test::DZil;
         $tzil->log_messages,
         supersetof(
             '[VerifyPhases] distmeta has already been calculated after file gathering phase!',
-            '[VerifyPhases] file has been added after munging phase: \'rogue_file\'',
+            "[VerifyPhases] file has been added after munging phase: \'rogue_file\' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line))",
         ),
         'warnings are logged about our naughty plugin',
     )
