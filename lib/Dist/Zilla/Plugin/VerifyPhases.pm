@@ -90,7 +90,8 @@ sub after_build
 
     foreach my $filename (keys %all_files)
     {
-        $self->log('file has been removed after munging phase: \'' . $filename . '\'');
+        $self->log('file has been removed after munging phase: \'' . $filename
+            . '\' (' . $all_files{$filename}{object}->added_by . ')');
     }
 }
 
