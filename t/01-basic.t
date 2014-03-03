@@ -67,9 +67,9 @@ my @added_line;
         [ grep { /\[VerifyPhases\]/ } @{ $tzil->log_messages } ],
         bag(
             '[VerifyPhases] distmeta has already been calculated after file gathering phase!',
-            "[VerifyPhases] file has been removed after munging phase: 'normal_file_0' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[0]))",
+            "[VerifyPhases] file has been removed after file pruning phase: 'normal_file_0' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[0]))",
             "[VerifyPhases] file has been renamed after munging phase: 'normal_file_1_moved' (originally 'normal_file_1', content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[1]))",
-            "[VerifyPhases] file has been added after munging phase: 'rogue_file_2' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[2]))",
+            "[VerifyPhases] file has been added after file gathering phase: 'rogue_file_2' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[2]))",
         ),
         'warnings are logged about our naughty plugin',
     )

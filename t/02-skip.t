@@ -27,7 +27,7 @@ use Path::Tiny;
         [
             grep { /\[VerifyPhases\]/ }
             # TODO: waiting for https://github.com/rjbs/Dist-Zilla/pull/229
-            grep { ! /^\[VerifyPhases\] file has been added after munging phase: 'Makefile.PL'/ }
+            grep { ! /^\[VerifyPhases\] file has been added after file gathering phase: 'Makefile.PL'/ }
                 @{ $tzil->log_messages }
         ],
         [],

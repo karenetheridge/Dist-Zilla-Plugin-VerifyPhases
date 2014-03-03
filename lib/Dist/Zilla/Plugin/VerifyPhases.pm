@@ -69,7 +69,7 @@ sub after_build
             }
             else
             {
-                $self->log('file has been added after munging phase: \'' . $file->name
+                $self->log('file has been added after file gathering phase: \'' . $file->name
                     . '\' (' . $file->added_by . ')');
             }
             next;
@@ -90,7 +90,7 @@ sub after_build
 
     foreach my $filename (keys %all_files)
     {
-        $self->log('file has been removed after munging phase: \'' . $filename
+        $self->log('file has been removed after file pruning phase: \'' . $filename
             . '\' (' . $all_files{$filename}{object}->added_by . ')');
     }
 }
