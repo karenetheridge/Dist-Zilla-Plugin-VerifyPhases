@@ -15,18 +15,26 @@ my $added_line;
         'Dist::Zilla::Role::FileGatherer',
         'Dist::Zilla::Role::PrereqSource',
         'Dist::Zilla::Role::FileInjector';
+    use Dist::Zilla::File::InMemory;
+    use List::MoreUtils 'first_value';
 
     sub gather_files
     {
         my $self = shift;
         my $distmeta = $self->zilla->distmeta;  # make the attribute fire
+        $self->add_file( Dist::Zilla::File::InMemory->new(
+            name => 'normal_file_0',
+            content => 'oh hai!',
+        ));
     }
     sub register_prereqs
     {
         my $self = shift;
-        require Dist::Zilla::File::InMemory;
+
+        $self->zilla->prune_file(first_value { $_->name eq 'normal_file_0' } @{$self->zilla->files});
+
         $added_line = __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
-            name => 'rogue_file',
+            name => 'rogue_file_1',
             content => 'naughty naughty!',
         ));
     }
@@ -52,7 +60,8 @@ my $added_line;
         [ grep { /\[VerifyPhases\]/ } @{ $tzil->log_messages } ],
         bag(
             '[VerifyPhases] distmeta has already been calculated after file gathering phase!',
-            "[VerifyPhases] file has been added after munging phase: \'rogue_file\' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line))",
+            "[VerifyPhases] file has been removed after munging phase: 'normal_file_0'",
+            "[VerifyPhases] file has been added after munging phase: 'rogue_file_1' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line))",
         ),
         'warnings are logged about our naughty plugin',
     )

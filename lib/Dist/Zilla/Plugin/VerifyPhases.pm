@@ -75,9 +75,9 @@ sub after_build
         delete $all_files{$file->name};
     }
 
-    foreach my $file (keys %all_files)
+    foreach my $filename (keys %all_files)
     {
-        $self->log('File has been removed after munging phase: \'' . $file . '\'');
+        $self->log('file has been removed after munging phase: \'' . $filename . '\'');
     }
 }
 
