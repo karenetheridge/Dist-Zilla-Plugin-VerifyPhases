@@ -14,7 +14,7 @@ use Path::Tiny;
             add_files => {
                 path(qw(source dist.ini)) => simple_ini(
                     [ MakeMaker => ],
-                    [ VerifyPhases => ],
+                    [ VerifyPhases => ], # { skip => [ 'Makefile.PL' ] }
                 ),
             },
         },
