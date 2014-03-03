@@ -5,6 +5,7 @@ use Test::More;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use Test::DZil;
+use Path::Tiny;
 
 my $added_line;
 {
@@ -36,7 +37,7 @@ my $added_line;
         { dist_root => 't/does_not_exist' },
         {
             add_files => {
-                'source/dist.ini' => simple_ini(
+                path(qw(source dist.ini)) => simple_ini(
                     [ Naughty => ],
                     [ VerifyPhases => ],
                 ),

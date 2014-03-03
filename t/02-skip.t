@@ -5,13 +5,14 @@ use Test::More;
 use if $ENV{AUTHOR_TESTING}, 'Test::Warnings';
 use Test::Deep;
 use Test::DZil;
+use Path::Tiny;
 
 {
     my $tzil = Builder->from_config(
         { dist_root => 't/does_not_exist' },
         {
             add_files => {
-                'source/dist.ini' => simple_ini(
+                path(qw(source dist.ini)) => simple_ini(
                     [ MakeMaker => ],
                     [ VerifyPhases => ],
                 ),
