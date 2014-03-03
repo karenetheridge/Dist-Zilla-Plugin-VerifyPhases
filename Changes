@@ -5,6 +5,8 @@ Revision history for {{$dist->name}}
             Build.PL, as this is normal and expected
           - also identify the original filename of a file that has been
             renamed
+          - additional checks for files removed outside the pruning phase or
+            added after the file gathering phase
 
 0.001     2014-02-23 05:11:23Z
           - Initial release.

@@ -7,6 +7,7 @@ package Dist::Zilla::Plugin::VerifyPhases;
 use Moose;
 with
     'Dist::Zilla::Role::FileGatherer',
+    'Dist::Zilla::Role::FilePruner',
     'Dist::Zilla::Role::FileMunger',
     'Dist::Zilla::Role::AfterBuild';
 use Moose::Util 'find_meta';
@@ -34,12 +35,100 @@ sub gather_files
     my $distmeta_attr = find_meta($self->zilla)->find_attribute_by_name('distmeta');
     $self->log('distmeta has already been calculated after file gathering phase!')
         if $distmeta_attr->has_value($self->zilla);
+
+    # all files should have been added by now. save their filenames/objects
+    foreach my $file (@{$self->zilla->files})
+    {
+        $all_files{$file->name} = {
+            object => $file,
+            # content can change; don't bother capturing it yet
+        }
+    }
 }
 
+# since last phase,
+# new files added: no
+# files removed: ok to now; no from now on
+# files renamed: no
+# contents: ignore
+sub prune_files
+{
+    my $self = shift;
+
+    foreach my $file (@{$self->zilla->files})
+    {
+        if ($all_files{$file->name} and $all_files{$file->name}{object} == $file)
+        {
+            delete $all_files{$file->name};
+            next;
+        }
+
+        # file has been renamed - an odd time to do this
+        if (my $orig_filename = first_value { $all_files{$_}{object} == $file } keys %all_files)
+        {
+            $self->log('file has been renamed after file gathering phase: \'' . $file->name
+                . "' (originally '$orig_filename', " . $file->added_by . ')');
+            delete $all_files{$orig_filename};
+            next;
+        }
+
+        $self->log('file has been added after file gathering phase: \'' . $file->name
+            . '\' (' . $file->added_by . ')');
+    }
+
+    # anything left over has been removed, but this is okay by a file pruner
+
+    # capture full file list all over again.
+    %all_files = ();
+    foreach my $file (@{$self->zilla->files})
+    {
+        $all_files{$file->name} = {
+            object => $file,
+            content => undef,   # content can change; don't bother capturing it yet
+        }
+    }
+}
+
+# since last phase,
+# new files added: no
+# files removed: no
+# files renamed: allowed
+# record contents: ok to now; no from now on
 sub munge_files
 {
     my $self = shift;
 
+    # cross off all files by their original filenames, to see what's left.
+    foreach my $file (@{$self->zilla->files})
+    {
+        if ($all_files{$file->name} and $all_files{$file->name}{object} == $file)
+        {
+            delete $all_files{$file->name};
+            next;
+        }
+
+        # file has been renamed - but this is okay by a file munger
+        if (my $orig_filename = first_value { $all_files{$_}{object} == $file } keys %all_files)
+        {
+            delete $all_files{$orig_filename};
+            next;
+        }
+
+        # this is a new file we haven't seen before.
+        $self->log('file has been added after file gathering phase: \'' . $file->name
+            . '\' (' . $file->added_by . ')');
+    }
+
+    # now report on any files added earlier that were removed.
+    foreach my $filename (keys %all_files)
+    {
+        $self->log('file has been removed after file pruning phase: \'' . $filename
+            . '\' (' . $all_files{$filename}{object}->added_by . ')');
+    }
+
+
+    # capture full file list all over again, recording contents now.
+    %all_files = ();
     foreach my $file (@{$self->zilla->files})
     {
         # don't force FromCode files to calculate early; it might fire some
@@ -53,6 +142,11 @@ sub munge_files
     }
 }
 
+# since last phase,
+# new files added: no
+# files removed: no
+# files renamed: no
+# change contents: no
 sub after_build
 {
     my $self = shift;
@@ -116,9 +210,17 @@ Running at the end of the C<-FileGatherer> phase, it verifies that the
 distribution's metadata has not yet been calculated (as it usually depends on
 knowing the full manifest of files in the distribution).
 
-It runs at the C<-FileMunger> and C<-AfterBuild> phases to record the state
-of files after they have been munged, and again at the end of the build
-process.  Any files that have had their names or content changed are flagged.
+Running at the end of the C<-FilePruner> phase, it verifies that no additional
+files have been added to the distribution, nor renamed, since the
+C<-FileGatherer> phase.
+
+Running at the end of the C<-FileMunger> phase, it verifies that no additional
+files have been added to nor removed from the distribution, nor renamed, since
+the C<-FilePruner> phase.
+
+Running at the end of the C<-AfterBuild> phase, the full state of all files
+are checked: files may not be added, removed, renamed nor had their content
+change.
 
 =for stopwords FromCode
 
@@ -127,7 +229,7 @@ content, as interesting side effects can occur if their content subs are run
 before all content is available (for example, other lazy builders can run too
 early, resulting in incomplete or missing data).
 
-=for Pod::Coverage gather_files munge_files after_build
+=for Pod::Coverage gather_files prune_files munge_files after_build
 
 =head1 SUPPORT
 
