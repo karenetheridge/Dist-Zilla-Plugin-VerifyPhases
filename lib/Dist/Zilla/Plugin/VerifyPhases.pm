@@ -11,9 +11,10 @@ with
     'Dist::Zilla::Role::AfterBuild';
 use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
-use List::MoreUtils 'none';
+use List::MoreUtils qw(none first_value);
 use namespace::autoclean;
 
+# filename => { object => $file_object, content => $checksummed_content }
 my %all_files;
 
 #sub mvp_multivalue_args { qw(skip) }
@@ -43,9 +44,12 @@ sub munge_files
     {
         # don't force FromCode files to calculate early; it might fire some
         # lazy attributes prematurely
-        $all_files{$file->name} = $file->isa('Dist::Zilla::File::FromCode')
-            ? 'content ignored'
-            : md5_hex($file->encoded_content);
+        $all_files{$file->name} = {
+            object => $file,
+            content => ( $file->isa('Dist::Zilla::File::FromCode')
+                ? 'content ignored'
+                : md5_hex($file->encoded_content) ),
+        }
     }
 }
 
@@ -57,8 +61,17 @@ sub after_build
     {
         if (not $all_files{$file->name} or $all_files{$file->name}{object} != $file)
         {
-            $self->log('file has been added after munging phase: \'' . $file->name
-                . '\' (' . $file->added_by . ')');
+            if (my $orig_filename = first_value { $all_files{$_}{object} == $file } keys %all_files)
+            {
+                $self->log('file has been renamed after munging phase: \'' . $file->name
+                    . "' (originally '$orig_filename', " . $file->added_by . ')');
+                delete $all_files{$orig_filename};
+            }
+            else
+            {
+                $self->log('file has been added after munging phase: \'' . $file->name
+                    . '\' (' . $file->added_by . ')');
+            }
             next;
         }
 
@@ -70,7 +83,7 @@ sub after_build
                 . '\' (' . $file->added_by . ')')
             if not $file->isa('Dist::Zilla::File::FromCode')
                 and none { $file->name eq $_ } $self->skip
-                and $all_files{$file->name} ne md5_hex($file->encoded_content);
+                and $all_files{$file->name}{content} ne md5_hex($file->encoded_content);
 
         delete $all_files{$file->name};
     }
