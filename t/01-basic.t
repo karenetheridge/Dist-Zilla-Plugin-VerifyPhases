@@ -49,8 +49,8 @@ my $added_line;
     $tzil->build;
 
     cmp_deeply(
-        $tzil->log_messages,
-        supersetof(
+        [ grep { /\[VerifyPhases\]/ } @{ $tzil->log_messages } ],
+        bag(
             '[VerifyPhases] distmeta has already been calculated after file gathering phase!',
             "[VerifyPhases] file has been added after munging phase: \'rogue_file\' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line))",
         ),
