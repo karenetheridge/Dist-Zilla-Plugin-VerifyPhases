@@ -55,7 +55,7 @@ sub after_build
 
     foreach my $file (@{$self->zilla->files})
     {
-        if (not exists $all_files{$file->name})
+        if (not $all_files{$file->name} or $all_files{$file->name}{object} != $file)
         {
             $self->log('file has been added after munging phase: \'' . $file->name
                 . '\' (' . $file->added_by . ')');
