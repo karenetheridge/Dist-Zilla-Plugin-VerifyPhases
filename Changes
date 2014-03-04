@@ -7,6 +7,8 @@ Revision history for {{$dist->name}}
             renamed
           - additional checks for files removed outside the pruning phase or
             added after the file gathering phase
+          - additional checks for files having their encodings changed outside
+            of the file gathering or encoding provider phase
 
 0.001     2014-02-23 05:11:23Z
           - Initial release.

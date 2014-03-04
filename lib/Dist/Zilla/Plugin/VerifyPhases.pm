@@ -7,6 +7,7 @@ package Dist::Zilla::Plugin::VerifyPhases;
 use Moose;
 with
     'Dist::Zilla::Role::FileGatherer',
+    'Dist::Zilla::Role::EncodingProvider',
     'Dist::Zilla::Role::FilePruner',
     'Dist::Zilla::Role::FileMunger',
     'Dist::Zilla::Role::AfterBuild';
@@ -41,6 +42,7 @@ sub gather_files
     {
         $all_files{$file->name} = {
             object => $file,
+            # encoding can change; don't bother capturing it yet
             # content can change; don't bother capturing it yet
         }
     }
@@ -48,8 +50,27 @@ sub gather_files
 
 # since last phase,
 # new files added: no
+# files removed: no
+# files renamed: no
+# encoding changed: ok to now; no from now on
+# contents: ignore
+sub set_file_encodings
+{
+    my $self = shift;
+
+    # since the encoding attribute is SetOnce, if we force all the builders to
+    # fire now, we can guarantee they won't change later
+    foreach my $file (@{$self->zilla->files})
+    {
+        $all_files{$file->name}{encoding} = $file->encoding;
+    }
+}
+
+# since last phase,
+# new files added: no
 # files removed: ok to now; no from now on
 # files renamed: no
+# encoding changed: no
 # contents: ignore
 sub prune_files
 {
@@ -84,6 +105,7 @@ sub prune_files
     {
         $all_files{$file->name} = {
             object => $file,
+            encoding => $file->encoding,
             content => undef,   # content can change; don't bother capturing it yet
         }
     }
@@ -93,6 +115,7 @@ sub prune_files
 # new files added: no
 # files removed: no
 # files renamed: allowed
+# encoding changed: no
 # record contents: ok to now; no from now on
 sub munge_files
 {
@@ -135,6 +158,7 @@ sub munge_files
         # lazy attributes prematurely
         $all_files{$file->name} = {
             object => $file,
+            encoding => $file->encoding,
             content => ( $file->isa('Dist::Zilla::File::FromCode')
                 ? 'content ignored'
                 : md5_hex($file->encoded_content) ),
@@ -210,6 +234,10 @@ Running at the end of the C<-FileGatherer> phase, it verifies that the
 distribution's metadata has not yet been calculated (as it usually depends on
 knowing the full manifest of files in the distribution).
 
+Running at the end of the C<-EncodingProvider> phase, it forces all encodings
+to be built (by calling their lazy builders), to use their C<SetOnce> property
+to ensure that no subsequent phase attempts to alter a file encoding.
+
 Running at the end of the C<-FilePruner> phase, it verifies that no additional
 files have been added to the distribution, nor renamed, since the
 C<-FileGatherer> phase.
@@ -229,7 +257,7 @@ content, as interesting side effects can occur if their content subs are run
 before all content is available (for example, other lazy builders can run too
 early, resulting in incomplete or missing data).
 
-=for Pod::Coverage gather_files prune_files munge_files after_build
+=for Pod::Coverage gather_files set_file_encodings prune_files munge_files after_build
 
 =head1 SUPPORT
 
