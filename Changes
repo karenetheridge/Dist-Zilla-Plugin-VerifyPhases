@@ -9,6 +9,8 @@ Revision history for {{$dist->name}}
             added after the file gathering phase
           - additional checks for files having their encodings changed outside
             of the file gathering or encoding provider phase
+          - at the start of the build, adjust the plugin order so we always
+            run last in each phase
 
 0.001     2014-02-23 05:11:23Z
           - Initial release.

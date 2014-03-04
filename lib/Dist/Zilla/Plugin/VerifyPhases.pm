@@ -6,6 +6,7 @@ package Dist::Zilla::Plugin::VerifyPhases;
 
 use Moose;
 with
+    'Dist::Zilla::Role::BeforeBuild',
     'Dist::Zilla::Role::FileGatherer',
     'Dist::Zilla::Role::EncodingProvider',
     'Dist::Zilla::Role::FilePruner',
@@ -13,7 +14,7 @@ with
     'Dist::Zilla::Role::AfterBuild';
 use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
-use List::MoreUtils qw(none first_value);
+use List::MoreUtils qw(none first_index first_value);
 use namespace::autoclean;
 
 # filename => { object => $file_object, content => $checksummed_content }
@@ -28,6 +29,18 @@ has skip => (
     lazy => 1,
     default => sub { [ qw(Makefile.PL Build.PL) ] },
 );
+
+sub before_build
+{
+    my $self = shift;
+
+    # adjust plugin order so that we are always last!
+    my $plugins = $self->zilla->plugins;
+    my $index = first_index { $_ == $self } @$plugins;
+
+    splice(@$plugins, $index, 1);
+    push @$plugins, $self;
+}
 
 sub gather_files
 {
@@ -220,7 +233,7 @@ __END__
 
 =head1 SYNOPSIS
 
-In your F<dist.ini>, as the last plugin loaded:
+In your F<dist.ini>:
 
     [VerifyPhases]
 
@@ -257,7 +270,7 @@ content, as interesting side effects can occur if their content subs are run
 before all content is available (for example, other lazy builders can run too
 early, resulting in incomplete or missing data).
 
-=for Pod::Coverage gather_files set_file_encodings prune_files munge_files after_build
+=for Pod::Coverage before_build gather_files set_file_encodings prune_files munge_files after_build
 
 =head1 SUPPORT
 
