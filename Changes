@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.002     2014-03-04 06:37:37Z
           - avoid warning about late modifications to Makefile.PL and
             Build.PL, as this is normal and expected
           - also identify the original filename of a file that has been
