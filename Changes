@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+          - also check that -VersionProvider plugins do not run too soon
 
 0.002     2014-03-04 06:37:37Z
           - avoid warning about late modifications to Makefile.PL and

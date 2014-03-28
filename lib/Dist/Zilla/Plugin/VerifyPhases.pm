@@ -50,6 +50,10 @@ sub gather_files
     $self->log('distmeta has already been calculated after file gathering phase!')
         if $distmeta_attr->has_value($self->zilla);
 
+    my $version_attr = find_meta($self->zilla)->find_attribute_by_name('version');
+    $self->log('version has already been calculated after file gathering phase!')
+        if $version_attr->has_value($self->zilla);
+
     # all files should have been added by now. save their filenames/objects
     foreach my $file (@{$self->zilla->files})
     {
@@ -245,7 +249,9 @@ actions outside the appropriate phase, so they can be fixed.
 
 Running at the end of the C<-FileGatherer> phase, it verifies that the
 distribution's metadata has not yet been calculated (as it usually depends on
-knowing the full manifest of files in the distribution).
+knowing the full manifest of files in the distribution), and that the
+distribution's version has not been calculated (as it can depend on parsing
+file content, before we know their encodings).
 
 Running at the end of the C<-EncodingProvider> phase, it forces all encodings
 to be built (by calling their lazy builders), to use their C<SetOnce> property
