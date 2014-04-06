@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.003     2014-04-06 20:38:06Z
           - also check that -VersionProvider plugins do not run too soon
 
 0.002     2014-03-04 06:37:37Z
