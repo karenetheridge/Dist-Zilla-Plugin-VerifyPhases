@@ -47,13 +47,12 @@ sub gather_files
 {
     my $self = shift;
 
-    my $distmeta_attr = find_meta($self->zilla)->find_attribute_by_name('distmeta');
-    $self->log('distmeta has already been calculated by end of file gathering phase!')
-        if $distmeta_attr->has_value($self->zilla);
-
-    my $version_attr = find_meta($self->zilla)->find_attribute_by_name('version');
-    $self->log('version has already been calculated by end of file gathering phase!')
-        if $version_attr->has_value($self->zilla);
+    foreach my $attr_name (qw(name version abstract main_module license authors distmeta))
+    {
+        my $attr = find_meta($self->zilla)->find_attribute_by_name($attr_name);
+        $self->log($attr_name . ' has already been calculated by end of file gathering phase')
+            if $attr->has_value($self->zilla);
+    }
 
     # all files should have been added by now. save their filenames/objects
     foreach my $file (@{$self->zilla->files})
@@ -182,6 +181,12 @@ sub munge_files
                 : md5_hex($file->encoded_content) ),
         }
     }
+
+    # verify that nothing has tried to read the prerequisite data yet
+    # (not possible until the attribute stops being unlazily built)
+    # my $prereq_attr = find_meta($self->zilla)->find_attribute_by_name('prereqs');
+    # $self->log('prereqs have already been read from by end of munging phase!')
+    #     if $prereq_attr->has_value($self->zilla);
 }
 
 # since last phase,
@@ -249,10 +254,18 @@ taken place so far.  Its intent is to find any plugins that are performing
 actions outside the appropriate phase, so they can be fixed.
 
 Running at the end of the C<-FileGatherer> phase, it verifies that the
-distribution's metadata has not yet been calculated (as it usually depends on
-knowing the full manifest of files in the distribution), and that the
-distribution's version has not been calculated (as it can depend on parsing
-file content, before we know their encodings).
+following distribution properties have not yet been populated/calculated, as
+they usually depend on having the full complement of files added to the
+distribution, with known encodings:
+
+=for :list
+* name
+* version
+* abstract
+* main_module
+* license
+* authors
+* metadata
 
 Running at the end of the C<-EncodingProvider> phase, it forces all encodings
 to be built (by calling their lazy builders), to use their C<SetOnce> property
@@ -264,7 +277,8 @@ C<-FileGatherer> phase.
 
 Running at the end of the C<-FileMunger> phase, it verifies that no additional
 files have been added to nor removed from the distribution, nor renamed, since
-the C<-FilePruner> phase.
+the C<-FilePruner> phase. Additionally, it verifies that the prerequisite list
+has not yet been read from.
 
 Running at the end of the C<-AfterBuild> phase, the full state of all files
 are checked: files may not be added, removed, renamed nor had their content

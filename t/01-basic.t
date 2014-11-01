@@ -12,18 +12,35 @@ my (@content_line, @filename_line);
     package Dist::Zilla::Plugin::Naughty;
     use Moose;
     with
+        'Dist::Zilla::Role::NameProvider',
+        'Dist::Zilla::Role::VersionProvider',
+        'Dist::Zilla::Role::LicenseProvider',
         'Dist::Zilla::Role::FileGatherer',
         'Dist::Zilla::Role::FileMunger',
         'Dist::Zilla::Role::PrereqSource',
         'Dist::Zilla::Role::FileInjector';
     use Dist::Zilla::File::InMemory;
     use List::Util 'first';
+    use Software::License::Artistic_2_0;
+
+    sub provide_name { 'My-Sample-Dist' }
+    sub provide_version { '999' }
+    sub provide_license { Software::License::Artistic_2_0->new({ holder => 'me', year => 2014 }) }
 
     sub gather_files
     {
         my $self = shift;
-        my $distmeta = $self->zilla->distmeta;  # make the attribute fire
-        my $version = $self->zilla->version;    # make the attribute fire
+
+        # add the main module
+        $self->add_file(Dist::Zilla::File::InMemory->new({
+            name => 'lib/Foo.pm',
+            content => "package Foo;\n# ABSTRACT: Ether wuz here\n1;\n",
+        }));
+
+        # make these attributes fire
+        my @stuff = map { $self->zilla->$_ }
+            qw(name version abstract main_module license authors distmeta);
+
         push @content_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
             name => 'normal_file_0',
             content => 'oh hai!',
@@ -53,6 +70,9 @@ my (@content_line, @filename_line);
             name => 'rogue_file_3',
             content => 'naughty naughty!',
         ));
+
+        # make this attribute fire
+        my $prereqs = $self->zilla->prereqs;
     }
     sub register_prereqs
     {
@@ -78,7 +98,7 @@ my (@content_line, @filename_line);
         { dist_root => 't/does_not_exist' },
         {
             add_files => {
-                path(qw(source dist.ini)) => simple_ini(
+                path(qw(source dist.ini)) => dist_ini(
                     [ Naughty => ],
                     [ VerifyPhases => ],
                 ),
@@ -94,13 +114,14 @@ my (@content_line, @filename_line);
     cmp_deeply(
         [ grep { /\[VerifyPhases\]/ } @{ $tzil->log_messages } ],
         bag(
-            '[VerifyPhases] distmeta has already been calculated by end of file gathering phase!',
-            '[VerifyPhases] version has already been calculated by end of file gathering phase!',
+            (map { "[VerifyPhases] $_ has already been calculated by end of file gathering phase" }
+                qw(name version abstract main_module license authors distmeta)),
             "[VerifyPhases] file has been removed by end of file pruning phase: 'normal_file_0_moved' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[0])" . (Dist::Zilla->VERSION < 5.023 ? '' : "; filename set by Naughty (Dist::Zilla::Plugin::Naughty line $filename_line[0])") . ")",
             "[VerifyPhases] file has been renamed by end of munging phase: 'normal_file_1_moved' (originally 'normal_file_1', content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[1])" . (Dist::Zilla->VERSION < 5.023 ? '' : "; filename set by Naughty (Dist::Zilla::Plugin::Naughty line $filename_line[1])") . ")",
             "[VerifyPhases] file has been removed by end of file pruning phase: 'normal_file_2' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[2]))",
             "[VerifyPhases] file has been added by end of file gathering phase: 'rogue_file_3' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[3]))",
             "[VerifyPhases] file has been added by end of file gathering phase: 'rogue_file_4' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[4]))",
+            # "[VerifyPhases] prereqs have already been read from by end of munging phase!",
         ),
         'warnings are logged about our naughty plugin',
     );
