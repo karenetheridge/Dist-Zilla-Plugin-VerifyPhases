@@ -7,7 +7,7 @@ use Test::Deep;
 use Test::DZil;
 use Path::Tiny;
 
-my @added_line;
+my (@content_line, @filename_line);
 {
     package Dist::Zilla::Plugin::Naughty;
     use Moose;
@@ -24,15 +24,15 @@ my @added_line;
         my $self = shift;
         my $distmeta = $self->zilla->distmeta;  # make the attribute fire
         my $version = $self->zilla->version;    # make the attribute fire
-        push @added_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
+        push @content_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
             name => 'normal_file_0',
             content => 'oh hai!',
         ));
-        push @added_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
+        push @content_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
             name => 'normal_file_1',
             content => 'oh hai!',
         ));
-        push @added_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
+        push @content_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
             name => 'normal_file_2',
             content => 'oh hai!',
         ));
@@ -43,13 +43,13 @@ my @added_line;
 
         # okay to rename files at munge time
         my $file0 = first { $_->name eq 'normal_file_0' } @{$self->zilla->files};
-        $file0->name('normal_file_0_moved');
+        push @filename_line, __LINE__; $file0->name('normal_file_0_moved');
 
         # not okay to remove files at munge time
         $self->zilla->prune_file(first { $_->name eq 'normal_file_2' } @{$self->zilla->files});
 
         # not okay to add files at munge time
-        push @added_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
+        push @content_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
             name => 'rogue_file_3',
             content => 'naughty naughty!',
         ));
@@ -63,10 +63,10 @@ my @added_line;
 
         # not okay to rename files at prereq time
         my $file1 = first { $_->name eq 'normal_file_1' } @{$self->zilla->files};
-        $file1->name('normal_file_1_moved');
+        push @filename_line, __LINE__; $file1->name('normal_file_1_moved');
 
         # not okay to add files at prereq time
-        push @added_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
+        push @content_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
             name => 'rogue_file_4',
             content => 'naughty naughty!',
         ));
@@ -89,16 +89,18 @@ my @added_line;
     $tzil->chrome->logger->set_debug(1);
     $tzil->build;
 
+    my $verb = Dist::Zilla->VERSION < 5.023 ? 'set' : 'added';
+
     cmp_deeply(
         [ grep { /\[VerifyPhases\]/ } @{ $tzil->log_messages } ],
         bag(
             '[VerifyPhases] distmeta has already been calculated after file gathering phase!',
             '[VerifyPhases] version has already been calculated after file gathering phase!',
-            "[VerifyPhases] file has been removed after file pruning phase: 'normal_file_0_moved' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[0]))",
-            "[VerifyPhases] file has been renamed after munging phase: 'normal_file_1_moved' (originally 'normal_file_1', content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[1]))",
-            "[VerifyPhases] file has been removed after file pruning phase: 'normal_file_2' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[2]))",
-            "[VerifyPhases] file has been added after file gathering phase: 'rogue_file_3' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[3]))",
-            "[VerifyPhases] file has been added after file gathering phase: 'rogue_file_4' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[4]))",
+            "[VerifyPhases] file has been removed after file pruning phase: 'normal_file_0_moved' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[0])" . (Dist::Zilla->VERSION < 5.023 ? '' : "; filename set by Naughty (Dist::Zilla::Plugin::Naughty line $filename_line[0])") . ")",
+            "[VerifyPhases] file has been renamed after munging phase: 'normal_file_1_moved' (originally 'normal_file_1', content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[1])" . (Dist::Zilla->VERSION < 5.023 ? '' : "; filename set by Naughty (Dist::Zilla::Plugin::Naughty line $filename_line[1])") . ")",
+            "[VerifyPhases] file has been removed after file pruning phase: 'normal_file_2' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[2]))",
+            "[VerifyPhases] file has been added after file gathering phase: 'rogue_file_3' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[3]))",
+            "[VerifyPhases] file has been added after file gathering phase: 'rogue_file_4' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[4]))",
         ),
         'warnings are logged about our naughty plugin',
     );

@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+          - fix tests that fail with Dist::Zilla 5.023 (changes to added_by
+            semantics)
 
 0.003     2014-04-06 20:38:06Z
           - also check that -VersionProvider plugins do not run too soon
