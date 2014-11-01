@@ -1,4 +1,6 @@
+/.ackrc
 /.build/
-!.gitignore
+!/.gitignore
+/.latest
 /Dist-Zilla-Plugin-VerifyPhases-*/
 /Dist-Zilla-Plugin-VerifyPhases-*.tar.gz
