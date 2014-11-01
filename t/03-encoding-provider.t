@@ -48,11 +48,15 @@ my @added_line;
         },
     );
 
+    $tzil->chrome->logger->set_debug(1);
     like(
         exception { $tzil->build },
         qr/cannot change value of .*encoding/,
         'cannot set encoding attribute after EncodingProvider phase',
     );
+
+    diag 'got log messages: ', explain $tzil->log_messages
+        if not Test::Builder->new->is_passing;
 }
 
 done_testing;

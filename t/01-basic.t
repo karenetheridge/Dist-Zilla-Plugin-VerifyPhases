@@ -101,8 +101,10 @@ my @added_line;
             "[VerifyPhases] file has been added after file gathering phase: 'rogue_file_4' (content set by Naughty (Dist::Zilla::Plugin::Naughty line $added_line[4]))",
         ),
         'warnings are logged about our naughty plugin',
-    )
-    or diag explain $tzil->log_messages;
+    );
+
+    diag 'got log messages: ', explain $tzil->log_messages
+        if not Test::Builder->new->is_passing;
 }
 
 done_testing;

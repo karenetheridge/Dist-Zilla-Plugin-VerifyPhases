@@ -32,8 +32,10 @@ use Path::Tiny;
         ],
         [],
         'no warnings from the plugin despite Makefile.PL being modified late',
-    )
-    or diag 'got messages: ', explain $tzil->log_messages;
+    );
+
+    diag 'got log messages: ', explain $tzil->log_messages
+        if not Test::Builder->new->is_passing;
 }
 
 done_testing;
