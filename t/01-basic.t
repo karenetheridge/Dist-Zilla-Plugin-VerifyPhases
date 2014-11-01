@@ -94,13 +94,13 @@ my (@content_line, @filename_line);
     cmp_deeply(
         [ grep { /\[VerifyPhases\]/ } @{ $tzil->log_messages } ],
         bag(
-            '[VerifyPhases] distmeta has already been calculated after file gathering phase!',
-            '[VerifyPhases] version has already been calculated after file gathering phase!',
-            "[VerifyPhases] file has been removed after file pruning phase: 'normal_file_0_moved' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[0])" . (Dist::Zilla->VERSION < 5.023 ? '' : "; filename set by Naughty (Dist::Zilla::Plugin::Naughty line $filename_line[0])") . ")",
-            "[VerifyPhases] file has been renamed after munging phase: 'normal_file_1_moved' (originally 'normal_file_1', content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[1])" . (Dist::Zilla->VERSION < 5.023 ? '' : "; filename set by Naughty (Dist::Zilla::Plugin::Naughty line $filename_line[1])") . ")",
-            "[VerifyPhases] file has been removed after file pruning phase: 'normal_file_2' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[2]))",
-            "[VerifyPhases] file has been added after file gathering phase: 'rogue_file_3' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[3]))",
-            "[VerifyPhases] file has been added after file gathering phase: 'rogue_file_4' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[4]))",
+            '[VerifyPhases] distmeta has already been calculated by end of file gathering phase!',
+            '[VerifyPhases] version has already been calculated by end of file gathering phase!',
+            "[VerifyPhases] file has been removed by end of file pruning phase: 'normal_file_0_moved' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[0])" . (Dist::Zilla->VERSION < 5.023 ? '' : "; filename set by Naughty (Dist::Zilla::Plugin::Naughty line $filename_line[0])") . ")",
+            "[VerifyPhases] file has been renamed by end of munging phase: 'normal_file_1_moved' (originally 'normal_file_1', content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[1])" . (Dist::Zilla->VERSION < 5.023 ? '' : "; filename set by Naughty (Dist::Zilla::Plugin::Naughty line $filename_line[1])") . ")",
+            "[VerifyPhases] file has been removed by end of file pruning phase: 'normal_file_2' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[2]))",
+            "[VerifyPhases] file has been added by end of file gathering phase: 'rogue_file_3' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[3]))",
+            "[VerifyPhases] file has been added by end of file gathering phase: 'rogue_file_4' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[4]))",
         ),
         'warnings are logged about our naughty plugin',
     );
