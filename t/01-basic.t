@@ -17,7 +17,7 @@ my @added_line;
         'Dist::Zilla::Role::PrereqSource',
         'Dist::Zilla::Role::FileInjector';
     use Dist::Zilla::File::InMemory;
-    use List::MoreUtils 'first_value';
+    use List::Util 'first';
 
     sub gather_files
     {
@@ -42,11 +42,11 @@ my @added_line;
         my $self = shift;
 
         # okay to rename files at munge time
-        my $file0 = first_value { $_->name eq 'normal_file_0' } @{$self->zilla->files};
+        my $file0 = first { $_->name eq 'normal_file_0' } @{$self->zilla->files};
         $file0->name('normal_file_0_moved');
 
         # not okay to remove files at munge time
-        $self->zilla->prune_file(first_value { $_->name eq 'normal_file_2' } @{$self->zilla->files});
+        $self->zilla->prune_file(first { $_->name eq 'normal_file_2' } @{$self->zilla->files});
 
         # not okay to add files at munge time
         push @added_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
@@ -59,10 +59,10 @@ my @added_line;
         my $self = shift;
 
         # not okay to remove files at prereq time
-        $self->zilla->prune_file(first_value { $_->name eq 'normal_file_0_moved' } @{$self->zilla->files});
+        $self->zilla->prune_file(first { $_->name eq 'normal_file_0_moved' } @{$self->zilla->files});
 
         # not okay to rename files at prereq time
-        my $file1 = first_value { $_->name eq 'normal_file_1' } @{$self->zilla->files};
+        my $file1 = first { $_->name eq 'normal_file_1' } @{$self->zilla->files};
         $file1->name('normal_file_1_moved');
 
         # not okay to add files at prereq time

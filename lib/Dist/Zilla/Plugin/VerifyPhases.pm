@@ -15,7 +15,7 @@ with
     'Dist::Zilla::Role::AfterBuild';
 use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
-use List::MoreUtils qw(none first_index first_value);
+use List::Util 1.33 qw(none first);
 use namespace::autoclean;
 
 # filename => { object => $file_object, content => $checksummed_content }
@@ -40,10 +40,7 @@ sub before_build
 
     # adjust plugin order so that we are always last!
     my $plugins = $self->zilla->plugins;
-    my $index = first_index { $_ == $self } @$plugins;
-
-    splice(@$plugins, $index, 1);
-    push @$plugins, $self;
+    @$plugins = ((grep { $_ != $self } @$plugins), $self);
 }
 
 sub gather_files
@@ -106,7 +103,7 @@ sub prune_files
         }
 
         # file has been renamed - an odd time to do this
-        if (my $orig_filename = first_value { $all_files{$_}{object} == $file } keys %all_files)
+        if (my $orig_filename = first { $all_files{$_}{object} == $file } keys %all_files)
         {
             $self->log('file has been renamed after file gathering phase: \'' . $file->name
                 . "' (originally '$orig_filename', " . $file->added_by . ')');
@@ -152,7 +149,7 @@ sub munge_files
         }
 
         # file has been renamed - but this is okay by a file munger
-        if (my $orig_filename = first_value { $all_files{$_}{object} == $file } keys %all_files)
+        if (my $orig_filename = first { $all_files{$_}{object} == $file } keys %all_files)
         {
             delete $all_files{$orig_filename};
             next;
@@ -200,7 +197,7 @@ sub after_build
     {
         if (not $all_files{$file->name} or $all_files{$file->name}{object} != $file)
         {
-            if (my $orig_filename = first_value { $all_files{$_}{object} == $file } keys %all_files)
+            if (my $orig_filename = first { $all_files{$_}{object} == $file } keys %all_files)
             {
                 $self->log('file has been renamed after munging phase: \'' . $file->name
                     . "' (originally '$orig_filename', " . $file->added_by . ')');

@@ -14,7 +14,7 @@ my @added_line;
     with
         'Dist::Zilla::Role::FileGatherer',
         'Dist::Zilla::Role::FileMunger';
-    use List::MoreUtils 'first_value';
+    use List::Util 'first';
     use Dist::Zilla::File::InMemory;
 
     sub gather_files
@@ -30,7 +30,7 @@ my @added_line;
         my $self = shift;
 
         # not okay to change encodings at munge time
-        my $file0 = first_value { $_->name eq 'file_0' } @{$self->zilla->files};
+        my $file0 = first { $_->name eq 'file_0' } @{$self->zilla->files};
         $file0->encoding('Latin1');
     }
 }
