@@ -1,0 +1,121 @@
+=pod
+
+=encoding UTF-8
+
+=head1 NAME
+
+Dist::Zilla::Plugin::VerifyPhases - Compare data and files at different phases of the distribution build process
+
+=head1 VERSION
+
+version 0.004
+
+=head1 SYNOPSIS
+
+In your F<dist.ini>:
+
+    [VerifyPhases]
+
+=head1 DESCRIPTION
+
+This plugin runs in multiple L<Dist::Zilla> phases to check what actions have
+taken place so far.  Its intent is to find any plugins that are performing
+actions outside the appropriate phase, so they can be fixed.
+
+Running at the end of the C<-FileGatherer> phase, it verifies that the
+following distribution properties have not yet been populated/calculated, as
+they usually depend on having the full complement of files added to the
+distribution, with known encodings:
+
+=over 4
+
+=item *
+
+name
+
+=item *
+
+version
+
+=item *
+
+abstract
+
+=item *
+
+main_module
+
+=item *
+
+license
+
+=item *
+
+authors
+
+=item *
+
+metadata
+
+=back
+
+Running at the end of the C<-EncodingProvider> phase, it forces all encodings
+to be built (by calling their lazy builders), to use their C<SetOnce> property
+to ensure that no subsequent phase attempts to alter a file encoding.
+
+Running at the end of the C<-FilePruner> phase, it verifies that no additional
+files have been added to the distribution, nor renamed, since the
+C<-FileGatherer> phase.
+
+Running at the end of the C<-FileMunger> phase, it verifies that no additional
+files have been added to nor removed from the distribution, nor renamed, since
+the C<-FilePruner> phase. Additionally, it verifies that the prerequisite list
+has not yet been read from.
+
+Running at the end of the C<-AfterBuild> phase, the full state of all files
+are checked: files may not be added, removed, renamed nor had their content
+change.
+
+=for stopwords FromCode
+
+Currently, L<FromCode|Dist::Zilla::File::FromCode> files are not checked for
+content, as interesting side effects can occur if their content subs are run
+before all content is available (for example, other lazy builders can run too
+early, resulting in incomplete or missing data).
+
+=for Pod::Coverage before_build gather_files set_file_encodings prune_files munge_files after_build
+
+=head1 SUPPORT
+
+=for stopwords irc
+
+Bugs may be submitted through L<the RT bug tracker|https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-PluginBundle-Author-ETHER>
+(or L<bug-Dist-Zilla-PluginBundle-Author-ETHER@rt.cpan.org|mailto:bug-Dist-Zilla-PluginBundle-Author-ETHER@rt.cpan.org>).
+I am also usually active on irc, as 'ether' at C<irc.perl.org>.
+
+=head1 SEE ALSO
+
+=over 4
+
+=item *
+
+L<Dist::Zilla::Plugin::ReportPhase>
+
+=item *
+
+L<Dist::Zilla::App::Command::dumpphases>
+
+=back
+
+=head1 AUTHOR
+
+Karen Etheridge <ether@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2014 by Karen Etheridge.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
