@@ -25,9 +25,12 @@ use Path::Tiny;
 
     cmp_deeply(
         [
-            grep { /\[VerifyPhases\]/ }
-            # TODO: waiting for https://github.com/rjbs/Dist-Zilla/pull/229
-            grep { ! /^\[VerifyPhases\] file has been added after file gathering phase: 'Makefile.PL'/ }
+            grep {
+                /\[VerifyPhases\]/
+                && ( Dist::Zilla->VERSION < 5.022
+                    ? ! /^\[VerifyPhases\] file has been added after file gathering phase: 'Makefile.PL'/
+                    : 1 )
+            }
                 @{ $tzil->log_messages }
         ],
         [],
