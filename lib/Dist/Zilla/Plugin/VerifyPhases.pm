@@ -31,6 +31,9 @@ has skip => (
     default => sub { [ qw(Makefile.PL Build.PL) ] },
 );
 
+# nothing to put in dump_config yet...
+# around dump_config => sub { ... };
+
 sub before_build
 {
     my $self = shift;
