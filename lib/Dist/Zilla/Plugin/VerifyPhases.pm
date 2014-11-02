@@ -15,7 +15,7 @@ with
     'Dist::Zilla::Role::AfterBuild';
 use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
-use List::Util 1.33 qw(none first);
+use List::Util 1.33 qw(none first any);
 use namespace::autoclean;
 
 # filename => { object => $file_object, content => $checksummed_content }
@@ -30,6 +30,21 @@ has skip => (
     lazy => 1,
     default => sub { [ qw(Makefile.PL Build.PL) ] },
 );
+
+my %zilla_constructor_args;
+
+sub BUILD
+{
+    my $self = shift;
+    my $zilla = $self->zilla;
+
+    # no phases have been run yet, so we can effectively capture the initial
+    # state of the zilla object (and determine its construction args)
+    %zilla_constructor_args = map {
+        my $attr = find_meta($zilla)->find_attribute_by_name($_);
+        $attr->has_value($zilla) ? ( $_ => $attr->get_value($zilla) ) : ()
+    } qw(name version abstract main_module authors distmeta _license_class _copyright_holder _copyright_year);
+}
 
 # nothing to put in dump_config yet...
 # around dump_config => sub { ... };
@@ -48,11 +63,20 @@ sub gather_files
     my $self = shift;
 
     my $zilla = $self->zilla;
-    foreach my $attr_name (qw(name version abstract main_module license authors distmeta))
+    foreach my $attr_name (qw(name version abstract main_module authors distmeta))
     {
+        next if exists $zilla_constructor_args{$attr_name};
         $self->log($attr_name . ' has already been calculated by end of file gathering phase')
             if find_meta($zilla)->find_attribute_by_name($attr_name)->has_value($zilla);
     }
+
+    # license is created from some private attrs, which may have been provided
+    # at construction time
+    $self->log('license has already been calculated by end of file gathering phase')
+        if any {
+            not exists $zilla_constructor_args{$_}
+                and find_meta($zilla)->find_attribute_by_name($_)->has_value($zilla)
+        } qw(_license_class _copyright_holder _copyright_year);
 
     # all files should have been added by now. save their filenames/objects
     foreach my $file (@{$zilla->files})
@@ -291,7 +315,7 @@ content, as interesting side effects can occur if their content subs are run
 before all content is available (for example, other lazy builders can run too
 early, resulting in incomplete or missing data).
 
-=for Pod::Coverage before_build gather_files set_file_encodings prune_files munge_files after_build
+=for Pod::Coverage BUILD before_build gather_files set_file_encodings prune_files munge_files after_build
 
 =head1 SUPPORT
 
