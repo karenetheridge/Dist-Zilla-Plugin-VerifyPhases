@@ -47,15 +47,16 @@ sub gather_files
 {
     my $self = shift;
 
+    my $zilla = $self->zilla;
     foreach my $attr_name (qw(name version abstract main_module license authors distmeta))
     {
-        my $attr = find_meta($self->zilla)->find_attribute_by_name($attr_name);
+        my $attr = find_meta($zilla)->find_attribute_by_name($attr_name);
         $self->log($attr_name . ' has already been calculated by end of file gathering phase')
-            if $attr->has_value($self->zilla);
+            if $attr->has_value($zilla);
     }
 
     # all files should have been added by now. save their filenames/objects
-    foreach my $file (@{$self->zilla->files})
+    foreach my $file (@{$zilla->files})
     {
         $all_files{$file->name} = {
             object => $file,
