@@ -29,7 +29,7 @@ use Path::Tiny;
                 /\[VerifyPhases\]/
                 && ! /^\[VerifyPhases\] .* has already been calculated by end of file gathering phase/
                 && ( Dist::Zilla->VERSION < 5.022
-                    ? ! /^\[VerifyPhases\] file has been added by end of file gathering phase: 'Makefile.PL'/
+                    ? ! /^\[VerifyPhases\] file has been added after file gathering phase: 'Makefile.PL'/
                     : 1 )
             }
                 @{ $tzil->log_messages }

@@ -104,13 +104,13 @@ sub prune_files
         # file has been renamed - an odd time to do this
         if (my $orig_filename = first { $all_files{$_}{object} == $file } keys %all_files)
         {
-            $self->log('file has been renamed by end of file gathering phase: \'' . $file->name
+            $self->log('file has been renamed after file gathering phase: \'' . $file->name
                 . "' (originally '$orig_filename', " . $file->added_by . ')');
             delete $all_files{$orig_filename};
             next;
         }
 
-        $self->log('file has been added by end of file gathering phase: \'' . $file->name
+        $self->log('file has been added after file gathering phase: \'' . $file->name
             . '\' (' . $file->added_by . ')');
     }
 
@@ -155,14 +155,14 @@ sub munge_files
         }
 
         # this is a new file we haven't seen before.
-        $self->log('file has been added by end of file gathering phase: \'' . $file->name
+        $self->log('file has been added after file gathering phase: \'' . $file->name
             . '\' (' . $file->added_by . ')');
     }
 
     # now report on any files added earlier that were removed.
     foreach my $filename (keys %all_files)
     {
-        $self->log('file has been removed by end of file pruning phase: \'' . $filename
+        $self->log('file has been removed after file pruning phase: \'' . $filename
             . '\' (' . $all_files{$filename}{object}->added_by . ')');
     }
 
@@ -185,7 +185,7 @@ sub munge_files
     # verify that nothing has tried to read the prerequisite data yet
     # (not possible until the attribute stops being unlazily built)
     # my $prereq_attr = find_meta($self->zilla)->find_attribute_by_name('prereqs');
-    # $self->log('prereqs have already been read from by end of munging phase!')
+    # $self->log('prereqs have already been read from after munging phase!')
     #     if $prereq_attr->has_value($self->zilla);
 }
 
@@ -204,13 +204,13 @@ sub after_build
         {
             if (my $orig_filename = first { $all_files{$_}{object} == $file } keys %all_files)
             {
-                $self->log('file has been renamed by end of munging phase: \'' . $file->name
+                $self->log('file has been renamed after munging phase: \'' . $file->name
                     . "' (originally '$orig_filename', " . $file->added_by . ')');
                 delete $all_files{$orig_filename};
             }
             else
             {
-                $self->log('file has been added by end of file gathering phase: \'' . $file->name
+                $self->log('file has been added after file gathering phase: \'' . $file->name
                     . '\' (' . $file->added_by . ')');
             }
             next;
@@ -218,7 +218,7 @@ sub after_build
 
         # we give FromCode files a bye, since there is a good reason why their
         # content at file munging time is incomplete
-        $self->log('content has changed by end of munging phase: \'' . $file->name
+        $self->log('content has changed after munging phase: \'' . $file->name
             # this looks suspicious; we ought to have separate added_by,
             # changed_by attributes
                 . '\' (' . $file->added_by . ')')
@@ -231,7 +231,7 @@ sub after_build
 
     foreach my $filename (keys %all_files)
     {
-        $self->log('file has been removed by end of file pruning phase: \'' . $filename
+        $self->log('file has been removed after file pruning phase: \'' . $filename
             . '\' (' . $all_files{$filename}{object}->added_by . ')');
     }
 }
