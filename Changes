@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+          - now also checking for premature prereq calculation, given a new
+            enough Dist::Zilla
 
 0.005     2014-11-02 05:44:51Z
           - avoid reporting false positives for core zilla attributes that

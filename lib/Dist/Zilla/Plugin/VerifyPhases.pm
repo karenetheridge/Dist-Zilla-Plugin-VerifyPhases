@@ -207,10 +207,10 @@ sub munge_files
     }
 
     # verify that nothing has tried to read the prerequisite data yet
-    # (not possible until the attribute stops being unlazily built)
-    # my $prereq_attr = find_meta($self->zilla)->find_attribute_by_name('prereqs');
-    # $self->log('prereqs have already been read from after munging phase!')
-    #     if $prereq_attr->has_value($self->zilla);
+    # (only possible when the attribute is lazily built)
+    my $prereq_attr = find_meta($self->zilla)->find_attribute_by_name('prereqs');
+    $self->log('prereqs have already been read from after munging phase!')
+         if Dist::Zilla->VERSION >= 5.024 and $prereq_attr->has_value($self->zilla);
 }
 
 # since last phase,
@@ -302,7 +302,7 @@ C<-FileGatherer> phase.
 Running at the end of the C<-FileMunger> phase, it verifies that no additional
 files have been added to nor removed from the distribution, nor renamed, since
 the C<-FilePruner> phase. Additionally, it verifies that the prerequisite list
-has not yet been read from.
+has not yet been read from, when possible.
 
 Running at the end of the C<-AfterBuild> phase, the full state of all files
 are checked: files may not be added, removed, renamed nor had their content
