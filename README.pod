@@ -8,7 +8,7 @@ Dist::Zilla::Plugin::VerifyPhases - Compare data and files at different phases o
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 
@@ -70,7 +70,7 @@ C<-FileGatherer> phase.
 Running at the end of the C<-FileMunger> phase, it verifies that no additional
 files have been added to nor removed from the distribution, nor renamed, since
 the C<-FilePruner> phase. Additionally, it verifies that the prerequisite list
-has not yet been read from.
+has not yet been read from, when possible.
 
 Running at the end of the C<-AfterBuild> phase, the full state of all files
 are checked: files may not be added, removed, renamed nor had their content
