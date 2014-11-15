@@ -8,7 +8,7 @@ Dist::Zilla::Plugin::VerifyPhases - Compare data and files at different phases o
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 
