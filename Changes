@@ -1,6 +1,7 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+          - bump required version of Term::ANSIColor for bright colours
 
 0.008     2014-11-15 03:02:07Z
           - fix test failure with older Dist::Zilla and coloured log messages

@@ -16,7 +16,7 @@ with
 use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
 use List::Util 1.33 qw(none first any);
-use Term::ANSIColor 'colored';
+use Term::ANSIColor 3.00 'colored';
 use namespace::autoclean;
 
 # filename => { object => $file_object, content => $checksummed_content }
