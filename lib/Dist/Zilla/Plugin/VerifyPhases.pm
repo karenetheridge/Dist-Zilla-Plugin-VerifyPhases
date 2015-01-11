@@ -16,11 +16,26 @@ with
 use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
 use List::Util 1.33 qw(none first any);
+use List::MoreUtils 'first_index';
 use Term::ANSIColor 3.00 'colored';
 use namespace::autoclean;
 
-# filename => { object => $file_object, content => $checksummed_content }
+# filename => [ { object => $file_object, content => $checksummed_content } ]
 my %all_files;
+
+# returns the filename and index under which the provided file can be found
+sub _search_all_files
+{
+    my ($self, $file) = @_;
+    my $index;
+    my $filename = first {
+        $index = first_index { $_->{object} == $file } @{ $all_files{$_} };
+        undef $index if $index == -1;
+        defined $index;
+    } keys %all_files;
+
+    return ($filename, $index);
+}
 
 #sub mvp_multivalue_args { qw(skip) }
 has skip => (
@@ -82,11 +97,11 @@ sub gather_files
     # all files should have been added by now. save their filenames/objects
     foreach my $file (@{$zilla->files})
     {
-        $all_files{$file->name} = {
+        push @{ $all_files{$file->name} }, {
             object => $file,
             # encoding can change; don't bother capturing it yet
             # content can change; don't bother capturing it yet
-        }
+        };
     }
 }
 
@@ -104,7 +119,10 @@ sub set_file_encodings
     # fire now, we can guarantee they won't change later
     foreach my $file (@{$self->zilla->files})
     {
-        $all_files{$file->name}{encoding} = $file->encoding;
+        foreach my $entry (@{ $all_files{$file->name} })
+        {
+            $entry->{encoding} = $file->encoding if $entry->{object} eq $file;
+        }
     }
 }
 
@@ -118,20 +136,18 @@ sub prune_files
 {
     my $self = shift;
 
+    # remove all still-existing files from our tracking list
     foreach my $file (@{$self->zilla->files})
     {
-        if ($all_files{$file->name} and $all_files{$file->name}{object} == $file)
+        my ($filename, $index) = $self->_search_all_files($file);
+        if ($filename and defined $index)
         {
-            delete $all_files{$file->name};
-            next;
-        }
-
-        # file has been renamed - an odd time to do this
-        if (my $orig_filename = first { $all_files{$_}{object} == $file } keys %all_files)
-        {
+            # file has been renamed - an odd time to do this
             $self->_alert('file has been renamed after file gathering phase: \'' . $file->name
-                . "' (originally '$orig_filename', " . $file->added_by . ')');
-            delete $all_files{$orig_filename};
+                    . "' (originally '$filename', " . $file->added_by . ')')
+                if $filename ne $file->name;
+
+            splice @{ $all_files{$filename} }, $index, 1;
             next;
         }
 
@@ -145,11 +161,11 @@ sub prune_files
     %all_files = ();
     foreach my $file (@{$self->zilla->files})
     {
-        $all_files{$file->name} = {
+        push @{ $all_files{$file->name} }, {
             object => $file,
             encoding => $file->encoding,
             content => undef,   # content can change; don't bother capturing it yet
-        }
+        };
     }
 }
 
@@ -163,19 +179,14 @@ sub munge_files
 {
     my $self = shift;
 
-    # cross off all files by their original filenames, to see what's left.
+    # remove all still-existing files from our tracking list
     foreach my $file (@{$self->zilla->files})
     {
-        if ($all_files{$file->name} and $all_files{$file->name}{object} == $file)
+        my ($filename, $index) = $self->_search_all_files($file);
+        if ($filename and defined $index)
         {
-            delete $all_files{$file->name};
-            next;
-        }
-
-        # file has been renamed - but this is okay by a file munger
-        if (my $orig_filename = first { $all_files{$_}{object} == $file } keys %all_files)
-        {
-            delete $all_files{$orig_filename};
+            # the file may have been renamed - but this is okay by a file munger
+            splice @{ $all_files{$filename} }, $index, 1;
             next;
         }
 
@@ -188,9 +199,9 @@ sub munge_files
     foreach my $filename (keys %all_files)
     {
         $self->_alert('file has been removed after file pruning phase: \'' . $filename
-            . '\' (' . $all_files{$filename}{object}->added_by . ')');
+                . '\' (' . $_->{object}->added_by . ')')
+            foreach @{ $all_files{$filename} };
     }
-
 
     # capture full file list all over again, recording contents now.
     %all_files = ();
@@ -198,13 +209,13 @@ sub munge_files
     {
         # don't force FromCode files to calculate early; it might fire some
         # lazy attributes prematurely
-        $all_files{$file->name} = {
+        push @{ $all_files{$file->name} }, {
             object => $file,
             encoding => $file->encoding,
             content => ( $file->isa('Dist::Zilla::File::FromCode')
                 ? 'content ignored'
                 : md5_hex($file->encoded_content) ),
-        }
+        };
     }
 
     # verify that nothing has tried to read the prerequisite data yet
@@ -225,19 +236,19 @@ sub after_build
 
     foreach my $file (@{$self->zilla->files})
     {
-        if (not $all_files{$file->name} or $all_files{$file->name}{object} != $file)
+        my ($filename, $index) = $self->_search_all_files($file);
+        if (not $filename or not defined $index)
         {
-            if (my $orig_filename = first { $all_files{$_}{object} == $file } keys %all_files)
-            {
-                $self->_alert('file has been renamed after munging phase: \'' . $file->name
-                    . "' (originally '$orig_filename', " . $file->added_by . ')');
-                delete $all_files{$orig_filename};
-            }
-            else
-            {
-                $self->_alert('file has been added after file gathering phase: \'' . $file->name
-                    . '\' (' . $file->added_by . ')');
-            }
+            $self->_alert('file has been added after file gathering phase: \'' . $file->name
+                . '\' (' . $file->added_by . ')');
+            next;
+        }
+
+        if ($filename ne $file->name)
+        {
+            $self->_alert('file has been renamed after munging phase: \'' . $file->name
+                . "' (originally '$filename', " . $file->added_by . ')');
+            splice @{ $all_files{$filename} }, $index, 1;
             next;
         }
 
@@ -249,7 +260,7 @@ sub after_build
                 . '\' (' . $file->added_by . ')')
             if not $file->isa('Dist::Zilla::File::FromCode')
                 and none { $file->name eq $_ } $self->skip
-                and $all_files{$file->name}{content} ne md5_hex($file->encoded_content);
+                and $all_files{$file->name}[$index]{content} ne md5_hex($file->encoded_content);
 
         delete $all_files{$file->name};
     }
@@ -257,7 +268,8 @@ sub after_build
     foreach my $filename (keys %all_files)
     {
         $self->_alert('file has been removed after file pruning phase: \'' . $filename
-            . '\' (' . $all_files{$filename}{object}->added_by . ')');
+                . '\' (' . $_->{object}->added_by . ')')
+            foreach @{ $all_files{$filename} };
     }
 }
 
