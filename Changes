@@ -1,6 +1,8 @@
 Revision history for {{$dist->name}}
 
 {{$NEXT}}
+
+0.010     2015-01-11 07:40:28Z
           - fix incorrect warning messages when two files are added with the
             same filename
 
