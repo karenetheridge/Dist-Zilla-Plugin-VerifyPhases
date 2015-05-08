@@ -102,6 +102,8 @@ my (@content_line, @filename_line);
         { dist_root => 't/does_not_exist' },
         {
             add_files => {
+                # no root section, because we want the attribute builders to
+                # be called for every core attribute.
                 path(qw(source dist.ini)) => dist_ini(
                     [ Naughty => ],
                     [ VerifyPhases => ],
