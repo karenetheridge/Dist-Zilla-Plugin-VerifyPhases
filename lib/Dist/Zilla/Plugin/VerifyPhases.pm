@@ -5,6 +5,8 @@ package Dist::Zilla::Plugin::VerifyPhases;
 # KEYWORDS: plugin distribution configuration phase verification validation
 # vim: set ts=8 sts=4 sw=4 tw=78 et :
 
+our $VERSION = '0.011';
+
 use Moose;
 with
     'Dist::Zilla::Role::BeforeBuild',
