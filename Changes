@@ -3,6 +3,7 @@ Revision history for Dist-Zilla-Plugin-VerifyPhases
 {{$NEXT}}
           - also test for premature population of release_status (a new
             attribute in Dist::Zilla 5.035)
+          - drop requirement for List::MoreUtils
 
 0.010     2015-01-11 07:40:28Z
           - fix incorrect warning messages when two files are added with the

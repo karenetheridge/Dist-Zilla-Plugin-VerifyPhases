@@ -15,8 +15,7 @@ with
     'Dist::Zilla::Role::AfterBuild';
 use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
-use List::Util 1.33 qw(none first any);
-use List::MoreUtils 'first_index';
+use List::Util 1.33 qw(none any);
 use Term::ANSIColor 3.00 'colored';
 use namespace::autoclean;
 
@@ -27,14 +26,14 @@ my %all_files;
 sub _search_all_files
 {
     my ($self, $file) = @_;
-    my $index;
-    my $filename = first {
-        $index = first_index { $_->{object} == $file } @{ $all_files{$_} };
-        undef $index if $index == -1;
-        defined $index;
-    } keys %all_files;
 
-    return ($filename, $index);
+    for my $filename (keys %all_files)
+    {
+        foreach my $index (0.. $#{$all_files{$filename}})
+        {
+            return ($filename, $index) if $all_files{$filename}[$index]{object} == $file;
+        }
+    }
 }
 
 #sub mvp_multivalue_args { qw(skip) }
