@@ -5,7 +5,7 @@ package Dist::Zilla::Plugin::VerifyPhases;
 # KEYWORDS: plugin distribution configuration phase verification validation
 # vim: set ts=8 sts=4 sw=4 tw=78 et :
 
-our $VERSION = '0.011';
+our $VERSION = '0.012';
 
 use Moose;
 with

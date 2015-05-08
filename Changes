@@ -1,5 +1,7 @@
 Revision history for Dist-Zilla-Plugin-VerifyPhases
 
+{{$NEXT}}
+
 0.011     2015-05-08 02:52:01Z
           - also test for premature population of release_status (a new
             attribute in Dist::Zilla 5.035)
