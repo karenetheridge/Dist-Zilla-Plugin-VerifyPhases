@@ -64,7 +64,7 @@ sub BUILD
     } qw(name version release_status abstract main_module authors distmeta _license_class _copyright_holder _copyright_year),
 }
 
-# nothing to put in dump_config yet...
+# no reason to include configs - this plugin does not alter the build output
 # around dump_config => sub { ... };
 
 sub before_build
