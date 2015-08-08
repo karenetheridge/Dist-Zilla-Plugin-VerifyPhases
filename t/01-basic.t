@@ -100,6 +100,10 @@ my (@content_line, @filename_line);
             name => 'rogue_file_4',
             content => 'naughty naughty!',
         ));
+
+        # not okay to alter non-prerequisite metadata at prereq time
+        $self->zilla->distmeta->{x_ohhai} = 'I am a bad plugin!';
+        #$self->zilla->distmeta->{dynamic_config} = 1;
     }
 }
 
@@ -143,6 +147,7 @@ my (@content_line, @filename_line);
 \[VerifyPhases\]\s+\}
 \[VerifyPhases\]\s+\}
 /),
+            re(qr/\[VerifyPhases\] distribution metadata has been altered after munging phase!.*Extra: \'x_ohhai\'/s),
         ),
         'warnings are logged about our naughty plugin',
     );

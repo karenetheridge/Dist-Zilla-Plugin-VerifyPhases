@@ -19,6 +19,8 @@ use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
 use List::Util 1.33 qw(none any);
 use Term::ANSIColor 3.00 'colored';
+use Storable 'dclone';
+use Test::Deep::NoTest qw(cmp_details deep_diag);
 use namespace::autoclean;
 
 # filename => [ { object => $file_object, content => $checksummed_content } ]
@@ -39,13 +41,22 @@ sub _search_all_files
 }
 
 #sub mvp_multivalue_args { qw(skip) }
-has skip => (
+has skip_file => (
     isa => 'ArrayRef[Str]',
     traits => [ 'Array' ],
-    handles => { skip => 'elements' },
+    handles => { skip_file => 'elements' },
     init_arg => undef,   # do not allow in configs just yet
     lazy => 1,
     default => sub { [ qw(Makefile.PL Build.PL) ] },
+);
+
+has skip_distmeta => (
+    isa => 'ArrayRef[Str]',
+    traits => [ 'Array' ],
+    handles => { skip_distmeta => 'elements' },
+    init_arg => undef,   # do not allow in configs just yet
+    lazy => 1,
+    default => sub { [ qw(x_static_install) ] },
 );
 
 my %zilla_constructor_args;
@@ -174,12 +185,15 @@ sub prune_files
     }
 }
 
+my $distmeta;
+
 # since last phase,
 # new files added: no
 # files removed: no
 # files renamed: allowed
 # encoding changed: no
 # record contents: ok to now; no from now on
+# distmeta changed: ok to now; no from now on
 # no prerequisites have been added yet
 sub munge_files
 {
@@ -231,14 +245,16 @@ sub munge_files
          if Dist::Zilla->VERSION >= 5.024 and $prereq_attr->has_value($self->zilla);
 
     # verify no prerequisites have been provided yet
-    # (it would be highly unlikely for distmeta not to be populated by now)
-    my $distmeta = $self->zilla->distmeta;
+    # (it would be highly unlikely for distmeta not to be populated yet, but
+    # force it anwyay so we have something to compare to later)
+    $distmeta = dclone($self->zilla->distmeta);
     if (exists $distmeta->{prereqs})
     {
         require Data::Dumper;
         $self->_alert('prereqs have been improperly included with distribution metadata:',
             Data::Dumper->new([ $distmeta->{prereqs} ])->Indent(2)->Terse(1)->Sortkeys(1)->Dump,
         );
+        delete $distmeta->{prereqs};
     }
 }
 
@@ -247,6 +263,7 @@ sub munge_files
 # files removed: no
 # files renamed: no
 # change contents: no
+# distmeta has not changed
 sub after_build
 {
     my $self = shift;
@@ -276,7 +293,7 @@ sub after_build
             # changed_by attributes
                 . '\' (' . $file->added_by . ')')
             if not $file->isa('Dist::Zilla::File::FromCode')
-                and none { $file->name eq $_ } $self->skip
+                and none { $file->name eq $_ } $self->skip_file
                 and $all_files{$file->name}[$index]{content} ne md5_hex($file->encoded_content);
 
         delete $all_files{$file->name};
@@ -287,6 +304,21 @@ sub after_build
         $self->_alert('file has been removed after file pruning phase: \'' . $filename
                 . '\' (' . $_->{object}->added_by . ')')
             foreach @{ $all_files{$filename} };
+    }
+
+    # check distmeta, minus prereqs
+    my $new_distmeta = dclone($self->zilla->distmeta);
+    delete $new_distmeta->{prereqs};
+    foreach my $ignore_key ($self->skip_distmeta)
+    {
+        $new_distmeta->{$ignore_key} = Test::Deep::ignore;
+        delete $new_distmeta->{$ignore_key} if not exists $distmeta->{$ignore_key};
+    }
+    my ($ok, $stack) = cmp_details($new_distmeta, $distmeta);
+    if (not $ok)
+    {
+        chomp(my $error = deep_diag($stack));
+        $self->_alert('distribution metadata has been altered after munging phase!', $error);
     }
 }
 
@@ -344,7 +376,9 @@ from, when possible.
 
 Running at the end of the C<-AfterBuild> phase, the full state of all files
 are checked: files may not be added, removed, renamed nor had their content
-change.
+change. Additionally, it verifies that no distribution metadata (with the
+exception of prerequisites) has changed since the end of the C<-FileMunger>
+phase.
 
 =for stopwords FromCode
 
