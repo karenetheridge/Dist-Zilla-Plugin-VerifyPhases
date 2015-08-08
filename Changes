@@ -1,6 +1,7 @@
 Revision history for Dist-Zilla-Plugin-VerifyPhases
 
 {{$NEXT}}
+          - now also checking for prereqs provided with other metadata
 
 0.011     2015-05-08 02:52:01Z
           - also test for premature population of release_status (a new

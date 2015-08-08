@@ -19,6 +19,7 @@ my (@content_line, @filename_line);
         'Dist::Zilla::Role::LicenseProvider',
         'Dist::Zilla::Role::FileGatherer',
         'Dist::Zilla::Role::FileMunger',
+        'Dist::Zilla::Role::MetaProvider',
         'Dist::Zilla::Role::PrereqSource',
         'Dist::Zilla::Role::FileInjector';
     use Dist::Zilla::File::InMemory;
@@ -78,6 +79,11 @@ my (@content_line, @filename_line);
         # make this attribute fire
         my $prereqs = $self->zilla->prereqs;
     }
+    sub metadata
+    {
+        my $self = shift;
+        +{ prereqs => { runtime => { requires => { 'Improper::Prereq' => '0' } } } }
+    }
     sub register_prereqs
     {
         my $self = shift;
@@ -129,6 +135,14 @@ my (@content_line, @filename_line);
             "[VerifyPhases] file has been added after file gathering phase: 'rogue_file_3' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[3]))",
             "[VerifyPhases] file has been added after file gathering phase: 'rogue_file_4' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[4]))",
             Dist::Zilla->VERSION >= 5.024 ? "[VerifyPhases] prereqs have already been read from after munging phase!" : (),
+            re(qr/\[VerifyPhases\] prereqs have been improperly included with distribution metadata: \{
+\[VerifyPhases\]\s+'runtime' => \{
+\[VerifyPhases\]\s+'requires' => \{
+\[VerifyPhases\]\s+'Improper::Prereq' => '0'
+\[VerifyPhases\]\s+\}
+\[VerifyPhases\]\s+\}
+\[VerifyPhases\]\s+\}
+/),
         ),
         'warnings are logged about our naughty plugin',
     );

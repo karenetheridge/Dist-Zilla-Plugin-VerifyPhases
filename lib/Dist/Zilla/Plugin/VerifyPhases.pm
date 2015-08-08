@@ -180,6 +180,7 @@ sub prune_files
 # files renamed: allowed
 # encoding changed: no
 # record contents: ok to now; no from now on
+# no prerequisites have been added yet
 sub munge_files
 {
     my $self = shift;
@@ -228,6 +229,17 @@ sub munge_files
     my $prereq_attr = find_meta($self->zilla)->find_attribute_by_name('prereqs');
     $self->_alert('prereqs have already been read from after munging phase!')
          if Dist::Zilla->VERSION >= 5.024 and $prereq_attr->has_value($self->zilla);
+
+    # verify no prerequisites have been provided yet
+    # (it would be highly unlikely for distmeta not to be populated by now)
+    my $distmeta = $self->zilla->distmeta;
+    if (exists $distmeta->{prereqs})
+    {
+        require Data::Dumper;
+        $self->_alert('prereqs have been improperly included with distribution metadata:',
+            Data::Dumper->new([ $distmeta->{prereqs} ])->Indent(2)->Terse(1)->Sortkeys(1)->Dump,
+        );
+    }
 }
 
 # since last phase,
@@ -326,8 +338,9 @@ C<-FileGatherer> phase.
 
 Running at the end of the C<-FileMunger> phase, it verifies that no additional
 files have been added to nor removed from the distribution, nor renamed, since
-the C<-FilePruner> phase. Additionally, it verifies that the prerequisite list
-has not yet been read from, when possible.
+the C<-FilePruner> phase; and that no prerequisites have yet been provided.
+Additionally, it verifies that the prerequisite list has not yet been read
+from, when possible.
 
 Running at the end of the C<-AfterBuild> phase, the full state of all files
 are checked: files may not be added, removed, renamed nor had their content
