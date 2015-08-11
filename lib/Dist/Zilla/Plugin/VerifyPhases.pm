@@ -311,8 +311,8 @@ sub after_build
     delete $new_distmeta->{prereqs};
     foreach my $ignore_key ($self->skip_distmeta)
     {
-        $new_distmeta->{$ignore_key} = Test::Deep::ignore;
-        delete $new_distmeta->{$ignore_key} if not exists $distmeta->{$ignore_key};
+        $distmeta->{$ignore_key} = Test::Deep::ignore;
+        delete $distmeta->{$ignore_key} if not exists $new_distmeta->{$ignore_key};
     }
     my ($ok, $stack) = cmp_details($new_distmeta, $distmeta);
     if (not $ok)
