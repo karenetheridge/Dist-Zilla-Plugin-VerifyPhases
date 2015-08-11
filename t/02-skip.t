@@ -43,4 +43,3 @@ use Term::ANSIColor 2.01 'colorstrip';
 }
 
 done_testing;
-
