@@ -72,7 +72,7 @@ sub BUILD
     %zilla_constructor_args = map {
         my $attr = $meta->find_attribute_by_name($_);
         $attr && $attr->has_value($zilla) ? ( $_ => $attr->get_value($zilla) ) : ()
-    } qw(name version release_status abstract main_module authors distmeta _license_class _copyright_holder _copyright_year),
+    } qw(name version release_status abstract main_module authors distmeta _license_class _copyright_holder _copyright_year);
 }
 
 # no reason to include configs - this plugin does not alter the build output
