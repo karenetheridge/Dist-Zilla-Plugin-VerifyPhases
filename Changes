@@ -1,6 +1,6 @@
 Revision history for Dist-Zilla-Plugin-VerifyPhases
 
-{{$NEXT}}
+0.013     2015-08-11 03:05:27Z
           - fix handling of skip_distmeta fields (i.e. special-casing of
             x_static_install)
 
