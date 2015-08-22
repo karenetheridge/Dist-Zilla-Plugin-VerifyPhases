@@ -33,7 +33,7 @@ sub _search_all_files
 
     for my $filename (keys %all_files)
     {
-        foreach my $index (0.. $#{$all_files{$filename}})
+        foreach my $index (0 .. $#{$all_files{$filename}})
         {
             return ($filename, $index) if $all_files{$filename}[$index]{object} == $file;
         }
