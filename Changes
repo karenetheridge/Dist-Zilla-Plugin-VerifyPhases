@@ -1,6 +1,7 @@
 Revision history for Dist-Zilla-Plugin-VerifyPhases
 
 {{$NEXT}}
+          - also check for premature reading of _share_dir_map
 
 0.013     2015-08-11 03:05:27Z
           - fix handling of skip_distmeta fields (i.e. special-casing of
