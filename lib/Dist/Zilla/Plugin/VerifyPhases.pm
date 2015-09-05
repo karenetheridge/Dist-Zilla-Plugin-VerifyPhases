@@ -390,14 +390,6 @@ early, resulting in incomplete or missing data).
 
 =for Pod::Coverage BUILD before_build gather_files set_file_encodings prune_files munge_files after_build
 
-=head1 SUPPORT
-
-=for stopwords irc
-
-Bugs may be submitted through L<the RT bug tracker|https://rt.cpan.org/Public/Dist/Display.html?Name=Dist-Zilla-PluginBundle-Author-ETHER>
-(or L<bug-Dist-Zilla-PluginBundle-Author-ETHER@rt.cpan.org|mailto:bug-Dist-Zilla-PluginBundle-Author-ETHER@rt.cpan.org>).
-I am also usually active on irc, as 'ether' at C<irc.perl.org>.
-
 =head1 SEE ALSO
 
 =for :list
