@@ -1,6 +1,6 @@
 Revision history for Dist-Zilla-Plugin-VerifyPhases
 
-{{$NEXT}}
+0.014     2016-02-16 03:10:21Z
           - also check for premature reading of _share_dir_map
 
 0.013     2015-08-11 03:05:27Z
