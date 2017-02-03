@@ -1,9 +1,9 @@
 use strict;
 use warnings;
 package Dist::Zilla::Plugin::VerifyPhases;
+# vim: set ts=8 sts=4 sw=4 tw=115 et :
 # ABSTRACT: Compare data and files at different phases of the distribution build process
 # KEYWORDS: plugin distribution configuration phase verification validation
-# vim: set ts=8 sts=4 sw=4 tw=115 et :
 
 our $VERSION = '0.015';
 
