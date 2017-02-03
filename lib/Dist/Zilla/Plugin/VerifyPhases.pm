@@ -346,7 +346,7 @@ __END__
 
 =head1 SYNOPSIS
 
-In your F<dist.ini>:
+At the end of your F<dist.ini>:
 
     [VerifyPhases]
 
