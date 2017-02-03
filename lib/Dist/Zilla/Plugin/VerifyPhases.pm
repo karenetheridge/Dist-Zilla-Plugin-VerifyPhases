@@ -105,7 +105,7 @@ sub gather_files
     my $zilla = $self->zilla;
     my $meta = find_meta($zilla);
 
-    foreach my $attr_name (qw(name version release_status abstract main_module authors distmeta _share_dir_map))
+    foreach my $attr_name (qw(name version release_status abstract main_module authors distmeta))
     {
         next if exists $zilla_constructor_args{$attr_name};
         my $attr = $meta->find_attribute_by_name($attr_name);
@@ -370,7 +370,6 @@ distribution, with known encodings:
 * license
 * authors
 * metadata
-* _share_dir_map
 
 Running at the end of the C<-EncodingProvider> phase, it forces all encodings
 to be built (by calling their lazy builders), to use their C<SetOnce> property

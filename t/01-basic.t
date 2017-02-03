@@ -43,7 +43,7 @@ my (@content_line, @filename_line);
 
         # make these attributes fire
         my @stuff = map { $self->zilla->$_ }
-            qw(name version abstract main_module license authors distmeta _share_dir_map),
+            qw(name version abstract main_module license authors distmeta),
             find_meta($self->zilla)->find_attribute_by_name('release_status') ? 'release_status' : ();
 
         push @content_line, __LINE__; $self->add_file( Dist::Zilla::File::InMemory->new(
@@ -131,7 +131,7 @@ my (@content_line, @filename_line);
         [ grep { /\[VerifyPhases\]/ } map { colorstrip($_) } @{ $tzil->log_messages } ],
         bag(
             (map { "[VerifyPhases] $_ has already been calculated by end of file gathering phase" }
-                qw(name version abstract main_module license authors distmeta _share_dir_map),
+                qw(name version abstract main_module license authors distmeta),
                 find_meta($tzil)->find_attribute_by_name('release_status') ? 'release_status' : ()),
             "[VerifyPhases] file has been removed after file pruning phase: 'normal_file_0_moved' (content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[0])" . (Dist::Zilla->VERSION < 5.023 ? '' : "; filename set by Naughty (Dist::Zilla::Plugin::Naughty line $filename_line[0])") . ")",
             "[VerifyPhases] file has been renamed after munging phase: 'normal_file_1_moved' (originally 'normal_file_1', content $verb by Naughty (Dist::Zilla::Plugin::Naughty line $content_line[1])" . (Dist::Zilla->VERSION < 5.023 ? '' : "; filename set by Naughty (Dist::Zilla::Plugin::Naughty line $filename_line[1])") . ")",
