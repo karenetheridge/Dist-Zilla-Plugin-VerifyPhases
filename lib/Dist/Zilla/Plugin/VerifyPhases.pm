@@ -133,9 +133,9 @@ sub gather_files
 }
 
 # since last phase,
-# new files added: no
-# files removed: no
-# files renamed: no
+# new files added: not ok
+# files removed: not ok
+# files renamed: not ok
 # encoding changed: ok to now; no from now on
 # contents: ignore
 sub set_file_encodings
@@ -154,10 +154,10 @@ sub set_file_encodings
 }
 
 # since last phase,
-# new files added: no
-# files removed: ok to now; no from now on
-# files renamed: no
-# encoding changed: no
+# new files added: not ok
+# files removed: ok to now; not ok from now on
+# files renamed: not ok
+# encoding changed: not ok
 # contents: ignore
 sub prune_files
 {
@@ -199,12 +199,12 @@ sub prune_files
 my $distmeta;
 
 # since last phase,
-# new files added: no
-# files removed: no
+# new files added: not ok
+# files removed: not ok
 # files renamed: allowed
-# encoding changed: no
-# record contents: ok to now; no from now on
-# distmeta changed: ok to now; no from now on
+# encoding changed: not ok
+# record contents: ok to now; not ok from now on
+# distmeta changed: ok to now; not ok from now on
 # no prerequisites have been added yet
 sub munge_files
 {
@@ -270,10 +270,10 @@ sub munge_files
 }
 
 # since last phase,
-# new files added: no
-# files removed: no
-# files renamed: no
-# change contents: no
+# new files added: not ok
+# files removed: not ok
+# files renamed: not ok
+# change contents: not ok
 # distmeta has not changed
 sub after_build
 {
