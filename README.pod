@@ -8,11 +8,11 @@ Dist::Zilla::Plugin::VerifyPhases - Compare data and files at different phases o
 
 =head1 VERSION
 
-version 0.014
+version 0.015
 
 =head1 SYNOPSIS
 
-In your F<dist.ini>:
+At the end of your F<dist.ini>:
 
     [VerifyPhases]
 
@@ -60,10 +60,6 @@ authors
 =item *
 
 metadata
-
-=item *
-
-_share_dir_map
 
 =back
 

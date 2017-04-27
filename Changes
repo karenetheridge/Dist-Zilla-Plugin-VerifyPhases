@@ -1,6 +1,6 @@
 Revision history for Dist-Zilla-Plugin-VerifyPhases
 
-{{$NEXT}}
+0.015     2017-04-27 15:58:47Z
           - remove tracking of _share_dir_map -- it can be legitimately read
             in the filegathering phase
 
