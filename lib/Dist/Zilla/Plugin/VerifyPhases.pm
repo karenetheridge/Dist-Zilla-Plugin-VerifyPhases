@@ -14,7 +14,10 @@ with
     'Dist::Zilla::Role::EncodingProvider',
     'Dist::Zilla::Role::FilePruner',
     'Dist::Zilla::Role::FileMunger',
-    'Dist::Zilla::Role::AfterBuild';
+    'Dist::Zilla::Role::AfterBuild',
+    'Dist::Zilla::Role::BeforeRelease',
+    'Dist::Zilla::Role::Releaser',
+    'Dist::Zilla::Role::AfterRelease';
 use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
 use List::Util 1.33 qw(none any);
@@ -96,6 +99,8 @@ sub before_build
     # adjust plugin order so that we are always last!
     my $plugins = $self->zilla->plugins;
     @$plugins = ((grep { $_ != $self } @$plugins), $self);
+
+    $self->log_debug('---- this is the last before_build plugin ----');
 }
 
 sub gather_files
@@ -130,6 +135,8 @@ sub gather_files
             # content can change; don't bother capturing it yet
         };
     }
+
+    $self->log_debug('---- this is the last gather_files plugin ----');
 }
 
 # since last phase,
@@ -151,6 +158,8 @@ sub set_file_encodings
             $entry->{encoding} = $file->encoding if $entry->{object} eq $file;
         }
     }
+
+    $self->log_debug('---- this is the last set_file_encodings plugin ----');
 }
 
 # since last phase,
@@ -194,6 +203,8 @@ sub prune_files
             content => undef,   # content can change; don't bother capturing it yet
         };
     }
+
+    $self->log_debug('---- this is the last prune_files plugin ----');
 }
 
 my $distmeta;
@@ -267,6 +278,8 @@ sub munge_files
         );
         delete $distmeta->{prereqs};
     }
+
+    $self->log_debug('---- this is the last munge_files plugin ----');
 }
 
 # since last phase,
@@ -331,6 +344,17 @@ sub after_build
         chomp(my $error = deep_diag($stack));
         $self->_alert('distribution metadata has been altered after munging phase!', $error);
     }
+
+    $self->log_debug('---- this is the last after_build plugin ----');
+}
+sub before_release {
+    shift->log_debug('---- this is the last before_release plugin ----');
+}
+sub release {
+    shift->log_debug('---- this is the last release plugin ----');
+}
+sub after_release {
+    shift->log_debug('---- this is the last after_release plugin ----');
 }
 
 sub _alert
@@ -399,6 +423,7 @@ before all content is available (for example, other lazy builders can run too
 early, resulting in incomplete or missing data).
 
 =for Pod::Coverage BUILD before_build gather_files set_file_encodings prune_files munge_files after_build
+before_release release after_release
 
 =head1 SEE ALSO
 
