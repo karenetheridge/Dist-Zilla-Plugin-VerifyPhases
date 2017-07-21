@@ -5,7 +5,7 @@ package Dist::Zilla::Plugin::VerifyPhases;
 # ABSTRACT: Compare data and files at different phases of the distribution build process
 # KEYWORDS: plugin distribution configuration phase verification validation
 
-our $VERSION = '0.016';
+our $VERSION = '0.017';
 
 use Moose;
 with

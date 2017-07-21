@@ -1,5 +1,7 @@
 Revision history for Dist-Zilla-Plugin-VerifyPhases
 
+{{$NEXT}}
+
 0.016     2017-07-21 19:57:28Z
           - debug logging is added at the end of each phase, to provide useful
             diagnostics in 'dzil build --verbose' when trying to figure out
