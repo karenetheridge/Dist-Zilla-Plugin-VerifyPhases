@@ -8,7 +8,7 @@ Dist::Zilla::Plugin::VerifyPhases - Compare data and files at different phases o
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 SYNOPSIS
 
@@ -91,6 +91,7 @@ before all content is available (for example, other lazy builders can run too
 early, resulting in incomplete or missing data).
 
 =for Pod::Coverage BUILD before_build gather_files set_file_encodings prune_files munge_files after_build
+before_release release after_release
 
 =head1 SEE ALSO
 
