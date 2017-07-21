@@ -347,12 +347,22 @@ sub after_build
 
     $self->log_debug('---- this is the last after_build plugin ----');
 }
+
 sub before_release {
     shift->log_debug('---- this is the last before_release plugin ----');
 }
-sub release {
-    shift->log_debug('---- this is the last release plugin ----');
+
+sub release
+{
+    my $self = shift;
+
+    # perform the check that we just neutered in Dist::Zilla::Dist::Builder::release
+    Carp::croak("you can't release without any Releaser plugins")
+        if @{ $self->zilla->plugins_with(-Releaser) } <= 1;
+
+    $self->log_debug('---- this is the last release plugin ----');
 }
+
 sub after_release {
     shift->log_debug('---- this is the last after_release plugin ----');
 }
