@@ -388,6 +388,7 @@ sub _alert
     $self->log(colored(join(' ', @_), 'bright_red'));
 }
 
+__PACKAGE__->meta->make_immutable;
 1;
 __END__
 
