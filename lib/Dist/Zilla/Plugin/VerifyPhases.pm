@@ -100,7 +100,7 @@ sub before_build
     my $plugins = $self->zilla->plugins;
     @$plugins = ((grep { $_ != $self } @$plugins), $self);
 
-    $self->log_debug('---- this is the last before_build plugin ----');
+    $self->log_debug('---- this is the last BeforeBuild plugin ----');
 }
 
 sub gather_files
@@ -136,7 +136,7 @@ sub gather_files
         };
     }
 
-    $self->log_debug('---- this is the last gather_files plugin ----');
+    $self->log_debug('---- this is the last FileGatherer plugin ----');
 }
 
 # since last phase,
@@ -159,7 +159,7 @@ sub set_file_encodings
         }
     }
 
-    $self->log_debug('---- this is the last set_file_encodings plugin ----');
+    $self->log_debug('---- this is the last EncodingProvider plugin ----');
 }
 
 # since last phase,
@@ -204,7 +204,7 @@ sub prune_files
         };
     }
 
-    $self->log_debug('---- this is the last prune_files plugin ----');
+    $self->log_debug('---- this is the last FilePruner plugin ----');
 }
 
 my $distmeta;
@@ -279,7 +279,7 @@ sub munge_files
         delete $distmeta->{prereqs};
     }
 
-    $self->log_debug('---- this is the last munge_files plugin ----');
+    $self->log_debug('---- this is the last FileMunger plugin ----');
 }
 
 # since last phase,
@@ -345,11 +345,11 @@ sub after_build
         $self->_alert('distribution metadata has been altered after munging phase!', $error);
     }
 
-    $self->log_debug('---- this is the last after_build plugin ----');
+    $self->log_debug('---- this is the last AfterBuild plugin ----');
 }
 
 sub before_release {
-    shift->log_debug('---- this is the last before_release plugin ----');
+    shift->log_debug('---- this is the last BeforeRelease plugin ----');
 }
 
 sub release
@@ -360,11 +360,11 @@ sub release
     Carp::croak("you can't release without any Releaser plugins")
         if @{ $self->zilla->plugins_with(-Releaser) } <= 1;
 
-    $self->log_debug('---- this is the last release plugin ----');
+    $self->log_debug('---- this is the last Releaser plugin ----');
 }
 
 sub after_release {
-    shift->log_debug('---- this is the last after_release plugin ----');
+    shift->log_debug('---- this is the last AfterRelease plugin ----');
 }
 
 sub _alert
