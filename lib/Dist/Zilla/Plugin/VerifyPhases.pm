@@ -14,7 +14,9 @@ with
     'Dist::Zilla::Role::EncodingProvider',
     'Dist::Zilla::Role::FilePruner',
     'Dist::Zilla::Role::FileMunger',
+    'Dist::Zilla::Role::PrereqSource',
     'Dist::Zilla::Role::AfterBuild',
+    'Dist::Zilla::Role::BeforeArchive',
     'Dist::Zilla::Role::BeforeRelease',
     'Dist::Zilla::Role::Releaser',
     'Dist::Zilla::Role::AfterRelease';
@@ -282,6 +284,15 @@ sub munge_files
     $self->log_debug('---- this is the last FileMunger plugin ----');
 }
 
+sub register_prereqs {
+    shift->log_debug('---- this is the last PrereqSource plugin ----');
+}
+
+# not yet -- trips StaticInstall heuristics
+# sub setup_installer {
+#     shift->log_debug('---- this is the last InstallTool plugin ----');
+# }
+
 # since last phase,
 # new files added: not ok
 # files removed: not ok
@@ -346,6 +357,10 @@ sub after_build
     }
 
     $self->log_debug('---- this is the last AfterBuild plugin ----');
+}
+
+sub before_archive {
+    shift->log_debug('---- this is the last BeforeArchive plugin ----');
 }
 
 sub before_release {
@@ -432,8 +447,8 @@ content, as interesting side effects can occur if their content subs are run
 before all content is available (for example, other lazy builders can run too
 early, resulting in incomplete or missing data).
 
-=for Pod::Coverage BUILD before_build gather_files set_file_encodings prune_files munge_files after_build
-before_release release after_release
+=for Pod::Coverage BUILD before_build gather_files set_file_encodings prune_files munge_files
+register_prereqs after_build before_archive before_release release after_release
 
 =head1 SEE ALSO
 

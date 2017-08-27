@@ -153,6 +153,7 @@ my (@content_line, @filename_line);
 \[VerifyPhases\]\s+\}
 /),
             re(qr/\[VerifyPhases\] distribution metadata has been altered after munging phase!.*Extra: \'x_ohhai\'/s),
+            '[VerifyPhases] ---- this is the last PrereqSource plugin ----',
             '[VerifyPhases] ---- this is the last AfterBuild plugin ----',
         ),
         'warnings are logged about our naughty plugin',
