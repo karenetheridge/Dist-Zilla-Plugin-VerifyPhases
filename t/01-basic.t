@@ -42,7 +42,7 @@ my (@content_line, @filename_line);
         }));
 
         # make these attributes fire
-        my @stuff = map { $self->zilla->$_ }
+        my @stuff = map $self->zilla->$_,
             qw(name version abstract main_module license authors distmeta),
             find_meta($self->zilla)->find_attribute_by_name('release_status') ? 'release_status' : ();
 
@@ -128,10 +128,10 @@ my (@content_line, @filename_line);
     my $verb = Dist::Zilla->VERSION < 5.023 ? 'set' : 'added';
 
     cmp_deeply(
-        [ grep { /\[VerifyPhases\]/ } map { colorstrip($_) } @{ $tzil->log_messages } ],
+        [ grep /\[VerifyPhases\]/, map colorstrip($_), @{ $tzil->log_messages } ],
         bag(
             '[VerifyPhases] ---- this is the last BeforeBuild plugin ----',
-            (map { "[VerifyPhases] $_ has already been calculated by end of file gathering phase" }
+            (map "[VerifyPhases] $_ has already been calculated by end of file gathering phase",
                 qw(name version abstract main_module license authors distmeta),
                 find_meta($tzil)->find_attribute_by_name('release_status') ? 'release_status' : ()),
             '[VerifyPhases] ---- this is the last FileGatherer plugin ----',

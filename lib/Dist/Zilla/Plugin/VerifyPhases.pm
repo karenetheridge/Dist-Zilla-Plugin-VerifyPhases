@@ -100,7 +100,7 @@ sub before_build
 
     # adjust plugin order so that we are always last!
     my $plugins = $self->zilla->plugins;
-    @$plugins = ((grep { $_ != $self } @$plugins), $self);
+    @$plugins = ((grep $_ != $self, @$plugins), $self);
 
     $self->log_debug('---- this is the last BeforeBuild plugin ----');
 }

@@ -45,9 +45,9 @@ $tzil->build;
 
 cmp_deeply(
     [
-        grep { ! /^\[VerifyPhases\] ---- this is the last .* plugin ----$/ }
-        grep { /\[VerifyPhases\]/ }
-        map { colorstrip($_) } @{ $tzil->log_messages }
+        grep !/^\[VerifyPhases\] ---- this is the last .* plugin ----$/,
+        grep /\[VerifyPhases\]/,
+        map colorstrip($_), @{ $tzil->log_messages }
     ],
     [],
     'no warnings from the plugin despite this meta field being modified after the normal phase',

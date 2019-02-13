@@ -26,14 +26,13 @@ use Term::ANSIColor 2.01 'colorstrip';
 
     cmp_deeply(
         [
-            grep {
+            grep
                 /\[VerifyPhases\]/
                 && ! /^\[VerifyPhases\] ---- this is the last .* plugin ----$/
                 && ( Dist::Zilla->VERSION < 5.022
                     ? ! /^\[VerifyPhases\] file has been added after file gathering phase: 'Makefile.PL'/
-                    : 1 )
-            }
-            map { colorstrip($_) } @{ $tzil->log_messages }
+                    : 1 ),
+            map colorstrip($_), @{ $tzil->log_messages }
         ],
         [],
         'no warnings from the plugin despite Makefile.PL being modified late',

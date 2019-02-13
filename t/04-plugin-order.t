@@ -23,7 +23,7 @@ use Path::Tiny;
     );
 
     cmp_deeply(
-        [ grep { !/^:/ } map { $_->plugin_name } @{ $tzil->plugins } ],
+        [ grep !/^:/, map $_->plugin_name, @{ $tzil->plugins } ],
         [ qw(GatherDir VerifyPhases MetaConfig Prereqs) ],
         'plugin order is as loaded, before the build is executed',
     );
@@ -32,7 +32,7 @@ use Path::Tiny;
     $tzil->build;
 
     cmp_deeply(
-        [ grep { !/^:/ } map { $_->plugin_name } @{ $tzil->plugins } ],
+        [ grep !/^:/, map $_->plugin_name, @{ $tzil->plugins } ],
         [ qw(GatherDir MetaConfig Prereqs VerifyPhases)  ],
         'after the build, [VerifyPhases] is last',
     );
