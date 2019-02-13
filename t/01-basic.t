@@ -134,6 +134,7 @@ my (@content_line, @filename_line);
             (map "[VerifyPhases] $_ has already been calculated by end of file gathering phase",
                 qw(name version abstract main_module license authors distmeta),
                 find_meta($tzil)->find_attribute_by_name('release_status') ? 'release_status' : ()),
+            '[VerifyPhases] ---- this is the last MetaProvider plugin (note this phase may have been run in the middle of another one) ----',
             '[VerifyPhases] ---- this is the last FileGatherer plugin ----',
             '[VerifyPhases] ---- this is the last EncodingProvider plugin ----',
             '[VerifyPhases] ---- this is the last FilePruner plugin ----',

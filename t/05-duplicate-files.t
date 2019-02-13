@@ -55,7 +55,7 @@ use Term::ANSIColor 2.01 'colorstrip';
 
     is(
         scalar(
-            grep !/^\[VerifyPhases\] ---- this is the last .* plugin ----$/,
+            grep !/^\[VerifyPhases\] ---- this is the last .* plugin .*----$/,
             grep /\[VerifyPhases\]/,
             map colorstrip($_), @{ $tzil->log_messages }
         ),

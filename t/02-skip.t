@@ -28,7 +28,7 @@ use Term::ANSIColor 2.01 'colorstrip';
         [
             grep
                 /\[VerifyPhases\]/
-                && ! /^\[VerifyPhases\] ---- this is the last .* plugin ----$/
+                && ! /^\[VerifyPhases\] ---- this is the last .* plugin .*----$/
                 && ( Dist::Zilla->VERSION < 5.022
                     ? ! /^\[VerifyPhases\] file has been added after file gathering phase: 'Makefile.PL'/
                     : 1 ),

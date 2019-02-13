@@ -19,7 +19,8 @@ with
     'Dist::Zilla::Role::BeforeArchive',
     'Dist::Zilla::Role::BeforeRelease',
     'Dist::Zilla::Role::Releaser',
-    'Dist::Zilla::Role::AfterRelease';
+    'Dist::Zilla::Role::AfterRelease',
+    'Dist::Zilla::Role::MetaProvider';
 use Moose::Util 'find_meta';
 use Digest::MD5 'md5_hex';
 use List::Util 1.33 qw(none any);
@@ -382,6 +383,10 @@ sub after_release {
     shift->log_debug('---- this is the last AfterRelease plugin ----');
 }
 
+sub metadata {
+    shift->log_debug('---- this is the last MetaProvider plugin (note this phase may have been run in the middle of another one) ----');
+}
+
 sub _alert
 {
     my $self = shift;
@@ -449,7 +454,7 @@ before all content is available (for example, other lazy builders can run too
 early, resulting in incomplete or missing data).
 
 =for Pod::Coverage BUILD before_build gather_files set_file_encodings prune_files munge_files
-register_prereqs after_build before_archive before_release release after_release
+register_prereqs after_build before_archive before_release release after_release metadata
 
 =head1 SEE ALSO
 
